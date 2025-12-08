@@ -343,6 +343,11 @@
 
         /* --- Responsive --- */
         @media (max-width: 768px) {
+            header { padding: 0.8rem 1rem; } /* Reduce header padding */
+            h1 { font-size: 1.3rem; } /* Slightly smaller title */
+            .controls { gap: 0.5rem; } /* Tighter controls gap */
+            .switch-container { font-size: 0.8rem; } /* Smaller switch text */
+
             .distance-grid { grid-template-columns: 1fr; }
             
             .calc-row.header { display: none; } /* Hide header on mobile */
@@ -368,7 +373,7 @@
 <body>
 
     <header>
-        <h1><i class="fa-solid fa-stopwatch"></i> TriCalc</h1>
+        <h1>TriCalc</h1>
         <div class="controls">
             <div class="switch-container">
                 <span>Metric</span>
@@ -499,8 +504,8 @@
     </button>
 
     <footer>
-        <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 2rem;">
-            &copy; 2025 TriCalc. <a href="https://www.linkedin.com/in/andreas-maos/" target="_blank" style="color: inherit; text-decoration: none;">Created by Andreas Maos.</a>
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0; padding: 0 1rem 100px 1rem;">
+            &copy; 2025 TriCalc. <a href="https://www.linkedin.com/in/andreas-maos/" target="_blank" style="color: inherit; text-decoration: none;">Created by Andreas Maos.</a> All rights reserved.
         </p>
     </footer>
 
