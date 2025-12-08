@@ -1,4 +1,4 @@
-# 🏊‍♀️🚴‍♂️🏃 TriCalc - The Vibe Coded Triathlon Calculator
+# 🏊‍♀️🚴‍♂️🏃 TriCalc - The Vibe-Coded Triathlon Calculator
 
 ## 📝 Project Description
 TriCalc is a modern, single-page web application designed to help triathletes accurately calculate and estimate their total race time. Simply input your distances and either your pace/speed or total time for each segment (Swim, Bike, Run, T1, T2), and TriCalc instantly delivers your cumulative race time.
