@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>Triathlon Time Calculator</title>
-    <meta name="description" content="A sleek, modern triathlon calculator. Easily estimate your total race time for swim, bike, and run segments across any distance.">
+    <meta name="description" content="Free triathlon calculator to estimate race times for Sprint, Olympic, 70.3, and Ironman distances. Accurate swim, bike, and run time & pace calculator.">
     <meta name="google-site-verification" content="4fwjruOFX5Z9I-qIhlG2VvcpWhB-urEvuggTiccUKbo" />
 
     <!-- Fonts -->
@@ -446,7 +446,7 @@
             <div class="calc-row">
                 <div class="sport-icon swim"><i class="fa-solid fa-person-swimming"></i> Swim</div>
                 <div class="time-input-container pace-wrapper" data-label="Pace (mm:ss/100)">
-                    <input type="text" id="paceSwim" placeholder="mm:ss">
+                    <input type="text" id="paceSwim" placeholder="mm:ss / 100m">
                 </div>
                 <div class="time-input-container time-wrapper">
                     <input type="text" id="timeSwim" placeholder="hh:mm:ss">
@@ -486,7 +486,7 @@
             <div class="calc-row">
                 <div class="sport-icon run"><i class="fa-solid fa-person-running"></i> Run</div>
                 <div class="time-input-container pace-wrapper" data-label="Pace (mm:ss/km)">
-                    <input type="text" id="paceRun" placeholder="mm:ss">
+                    <input type="text" id="paceRun" placeholder="mm:ss / km">
                 </div>
                 <div class="time-input-container time-wrapper">
                     <input type="text" id="timeRun" placeholder="hh:mm:ss">
@@ -536,17 +536,17 @@
 
         const DROPDOWN_TEXTS = {
             metric: {
-                sprint: "Sprint (750m / 20km / 5km)",
-                olympic: "Olympic (1.5km / 40km / 10km)",
-                half: "Half Ironman (1.9km / 90km / 21.1km)",
-                full: "Full Ironman (3.8km / 180km / 42.2km)",
+                sprint: "Sprint: Swim 750m | Bike 20km | Run 5km",
+                olympic: "Olympic: Swim 1500m | Bike 40km | Run 10km",
+                half: "Half Ironman - 70.3: Swim 1900m | Bike 90km | Run 21.1km",
+                full: "Full Ironman - 140.6: Swim 3800m | Bike 180km | Run 42.2km",
                 custom: "Custom Distance"
             },
             imperial: {
-                sprint: "Sprint (820y / 12.4mi / 3.1mi)",
-                olympic: "Olympic (1640y / 24.9mi / 6.2mi)",
-                half: "Half Ironman (2078y / 56mi / 13.1mi)",
-                full: "Full Ironman (4156y / 112mi / 26.2mi)",
+                sprint: "Sprint: Swim 0.5mi/820y | Bike 12.4mi | Run 3.1mi",
+                olympic: "Olympic: Swim 0.93mi/1640y | Bike 24.9mi | Run 6.2mi",
+                half: "Half Ironman - 70.3: Swim 1.2mi/2078y | Bike 56mi | Run 13.1mi",
+                full: "Full Ironman - 140.6: Swim 2.4mi/4156y | Bike 112mi | Run 26.2mi",
                 custom: "Custom Distance"
             }
         };
@@ -555,12 +555,16 @@
             metric: { 
                 swim: 'm', bike: 'km', run: 'km', 
                 swimPace: 'Pace (mm:ss/100m)', runPace: 'Pace (mm:ss/km)', bikeSpeed: 'Speed (km/h)',
-                speedPlaceholder: 'Speed (km/h)'
+                speedPlaceholder: 'Speed (km/h)',
+                swimPacePlaceholder: 'mm:ss / 100m',
+                runPacePlaceholder: 'mm:ss / km'
             },
             imperial: { 
                 swim: 'y', bike: 'mi', run: 'mi', 
                 swimPace: 'Pace (mm:ss/100y)', runPace: 'Pace (mm:ss/mi)', bikeSpeed: 'Speed (mph)',
-                speedPlaceholder: 'Speed (mph)'
+                speedPlaceholder: 'Speed (mph)',
+                swimPacePlaceholder: 'mm:ss / 100y',
+                runPacePlaceholder: 'mm:ss / mi'
             }
         };
 
@@ -774,8 +778,10 @@
             els.labels.runPace.setAttribute('data-label', LABELS[currentUnit].runPace);
             els.labels.bikeSpeed.setAttribute('data-label', LABELS[currentUnit].bikeSpeed);
             
-            // Update Placeholder for Bike Speed
+            // Update Placeholders
             els.pace.bike.placeholder = LABELS[currentUnit].speedPlaceholder;
+            els.pace.swim.placeholder = LABELS[currentUnit].swimPacePlaceholder;
+            els.pace.run.placeholder = LABELS[currentUnit].runPacePlaceholder;
 
             // Update Dropdown Text
             updateDropdownLabels();
