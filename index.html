@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JYQFYVE8BH"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        
+        gtag('config', 'G-JYQFYVE8BH');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triathlon Time Calculator</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* Dark Mode (Default) - Earthy/Pastel Theme */
+            --bg-color: #2b2b2b;       /* Soft Charcoal */
+            --card-bg: #363636;        /* Lighter Charcoal */
+            --text-main: #e3e3e3;      /* Bone White */
+            --text-muted: #a8a8a8;     /* Soft Grey */
+            --border-color: #4a4a4a;
+            --input-bg: #404040;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            
+            /* Sport Specific Colors (Pastel/Muted) */
+            --color-swim: #89CFF0;     /* Pastel Baby Blue */
+            --color-bike: #90EE90;     /* Pastel Light Green */
+            --color-run: #FFB347;      /* Pastel Orange */
+            --color-trans: #C0C0C0;    /* Silver/Grey */
+
+            --accent-primary: #d6d6d6; /* Light Grey */
+            
+            --font-heading: 'Poppins', sans-serif;
+            --font-body: 'Open Sans', sans-serif;
+        }
+
+        [data-theme="light"] {
+            /* Light Mode - Earthy/Pastel Theme */
+            --bg-color: #f7f5f0;       /* Cream/Paper */
+            --card-bg: #ffffff;
+            --text-main: #4a4a4a;      /* Dark Slate */
+            --text-muted: #8c8c8c;
+            --border-color: #e0e0e0;
+            --input-bg: #fdfcf8;
+            --shadow: 0 4px 15px rgba(0,0,0,0.05);
+
+            /* Sport Colors (Slightly deeper for visibility on light) */
+            --color-swim: #5D9CEC;     /* Soft Blue */
+            --color-bike: #8CC152;     /* Grass Green */
+            --color-run: #F6BB42;      /* Warm Yellow/Orange */
+            --color-trans: #AAB2BD;    /* Blue Grey */
+            
+            --accent-primary: #757575; /* Medium Grey (for contrast on light bg) */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s; }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            scroll-behavior: smooth;
+        }
+
+        /* --- Header & Controls --- */
+        header {
+            background-color: var(--card-bg);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* Toggle Switch Styling */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--text-muted);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--accent-primary); border-color: var(--accent-primary); }
+        input:checked + .slider:before { transform: translateX(26px); background-color: #fff; }
+
+        .theme-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .theme-btn:hover { color: var(--accent-primary); border-color: var(--accent-primary); }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            width: 100%;
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* --- Sections --- */
+        .section-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        /* --- Distance Inputs --- */
+        .preset-select {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 8px;
+            font-family: var(--font-body);
+            margin-bottom: 1.5rem;
+            outline: none;
+            cursor: pointer;
+        }
+        .preset-select:focus { border-color: var(--accent-primary); }
+
+        .distance-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--input-bg);
+            border: 1px solid transparent;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-weight: 600;
+            outline: none;
+        }
+
+        .input-wrapper input:focus {
+            border-bottom-color: var(--accent-primary);
+        }
+
+        /* Remove default up/down arrows from number inputs */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield; /* For Firefox */
+        }
+
+        .unit-label {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            pointer-events: none; /* Ensures clicks pass through to the input */
+        }
+
+        /* --- Calculator Table --- */
+        .calc-row {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1.5fr;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .calc-row:last-child { border-bottom: none; }
+        .calc-row.header { font-family: var(--font-heading); font-weight: 600; color: var(--accent-primary); padding-bottom: 0.5rem; }
+
+        .sport-icon {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+        .sport-icon i { width: 24px; text-align: center; font-size: 1.1rem; }
+
+        /* Sport Specific Color Assignments */
+        .sport-icon.swim i { color: var(--color-swim); }
+        .sport-icon.bike i { color: var(--color-bike); }
+        .sport-icon.run i { color: var(--color-run); }
+        .sport-icon.trans i { color: var(--color-trans); }
+
+        .time-input-container input {
+            width: 100%;
+            padding: 0.6rem;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            text-align: center;
+            font-family: var(--font-body); /* Changed from monospace to fix wide spacing */
+            font-variant-numeric: tabular-nums; /* Ensures numbers still align perfectly */
+            font-size: 1rem;
+        }
+        .time-input-container input:focus { border-color: var(--accent-primary); outline: none; }
+        
+        .disabled-input { opacity: 0.3; pointer-events: none; border: none !important; background: transparent !important; }
+
+        /* --- Total Time --- */
+        .total-section {
+            text-align: center;
+            margin-top: 1rem;
+            background: var(--input-bg); /* Simplified background for earth theme */
+            border: 1px solid var(--accent-primary);
+        }
+
+        .total-label { font-size: 1rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .total-display { 
+            font-family: monospace; 
+            font-size: 3rem; 
+            font-weight: 700; 
+            color: var(--text-main);
+        }
+
+        /* --- Back to Top --- */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--accent-primary);
+            color: var(--bg-color); /* Changed to bg-color for better contrast against light grey accent */
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 99;
+        }
+        .back-to-top:hover { transform: translateY(-3px); }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .distance-grid { grid-template-columns: 1fr; }
+            
+            .calc-row.header { display: none; } /* Hide header on mobile */
+            
+            .calc-row {
+                grid-template-columns: 1fr;
+                grid-template-areas: "sport" "pace" "time";
+                background-color: var(--input-bg);
+                border-radius: 8px;
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border: 1px solid var(--border-color);
+            }
+
+            .sport-icon { grid-area: sport; margin-bottom: 0.5rem; font-size: 1.1rem; }
+            
+            /* Add labels via pseudo-elements for mobile since header is hidden */
+            .pace-wrapper::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+            .time-wrapper::before { content: "Total Time"; display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-stopwatch"></i> TriCalc</h1>
+        <div class="controls">
+            <div class="switch-container">
+                <span>Metric</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="unitToggle">
+                    <span class="slider"></span>
+                </label>
+                <span>Imperial</span>
+            </div>
+            <button class="theme-btn" id="themeToggle"><i class="fa-solid fa-sun"></i></button>
+        </div>
+    </header>
+
+    <main>
+        <!-- DISTANCE SECTION -->
+        <section class="section-card">
+            <div class="section-header">Race Distances</div>
+            
+            <select id="racePreset" class="preset-select">
+                <option value="sprint">Sprint</option>
+                <option value="olympic">Olympic</option>
+                <option value="half">Half Ironman</option>
+                <option value="full">Full Ironman</option>
+                <option value="custom">Custom Distance</option>
+            </select>
+
+            <div class="distance-grid">
+                <!-- Swim Distance -->
+                <div class="input-group">
+                    <label>Swim</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="distSwim" step="any">
+                        <span class="unit-label" id="labelDistSwim">m</span>
+                    </div>
+                </div>
+                <!-- Bike Distance -->
+                <div class="input-group">
+                    <label>Bike</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="distBike" step="any">
+                        <span class="unit-label" id="labelDistBike">km</span>
+                    </div>
+                </div>
+                <!-- Run Distance -->
+                <div class="input-group">
+                    <label>Run</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="distRun" step="any">
+                        <span class="unit-label" id="labelDistRun">km</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CALCULATOR SECTION -->
+        <section class="section-card">
+            <div class="section-header">Pace & Time Calculator</div>
+
+            <!-- Header Row (Desktop) -->
+            <div class="calc-row header">
+                <div>Sport</div>
+                <div>Pace / Speed</div>
+                <div>Time</div>
+            </div>
+
+            <!-- SWIM -->
+            <div class="calc-row">
+                <div class="sport-icon swim"><i class="fa-solid fa-person-swimming"></i> Swim</div>
+                <div class="time-input-container pace-wrapper" data-label="Pace (mm:ss/100)">
+                    <input type="text" id="paceSwim" placeholder="mm:ss">
+                </div>
+                <div class="time-input-container time-wrapper">
+                    <input type="text" id="timeSwim" placeholder="hh:mm:ss">
+                </div>
+            </div>
+
+            <!-- T1 -->
+            <div class="calc-row">
+                <div class="sport-icon trans"><i class="fa-solid fa-arrow-right-arrow-left"></i> T1</div>
+                <div class="time-input-container disabled-input"></div> <!-- No Pace for T1 -->
+                <div class="time-input-container time-wrapper">
+                    <input type="text" id="timeT1" placeholder="mm:ss">
+                </div>
+            </div>
+
+            <!-- BIKE -->
+            <div class="calc-row">
+                <div class="sport-icon bike"><i class="fa-solid fa-bicycle"></i> Bike</div>
+                <div class="time-input-container pace-wrapper" id="labelSpeedBikeWrapper" data-label="Speed (km/h)">
+                    <input type="number" id="speedBike" placeholder="Speed (km/h)">
+                </div>
+                <div class="time-input-container time-wrapper">
+                    <input type="text" id="timeBike" placeholder="hh:mm:ss">
+                </div>
+            </div>
+
+            <!-- T2 -->
+            <div class="calc-row">
+                <div class="sport-icon trans"><i class="fa-solid fa-arrow-right-arrow-left"></i> T2</div>
+                <div class="time-input-container disabled-input"></div> <!-- No Pace for T2 -->
+                <div class="time-input-container time-wrapper">
+                    <input type="text" id="timeT2" placeholder="mm:ss">
+                </div>
+            </div>
+
+            <!-- RUN -->
+            <div class="calc-row">
+                <div class="sport-icon run"><i class="fa-solid fa-person-running"></i> Run</div>
+                <div class="time-input-container pace-wrapper" data-label="Pace (mm:ss/km)">
+                    <input type="text" id="paceRun" placeholder="mm:ss">
+                </div>
+                <div class="time-input-container time-wrapper">
+                    <input type="text" id="timeRun" placeholder="hh:mm:ss">
+                </div>
+            </div>
+
+        </section>
+
+        <!-- TOTAL TIME -->
+        <section class="section-card total-section">
+            <div class="total-label">Estimated Finish Time</div>
+            <div class="total-display" id="totalTimeDisplay">00:00:00</div>
+        </section>
+    </main>
+
+    <button class="back-to-top" id="btnBackToTop" title="Back to Top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <footer>
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 2rem;">
+            &copy; 2025 TriCalc. <a href="https://www.linkedin.com/in/andreas-maos/" target="_blank" style="color: inherit; text-decoration: none;">Created by Andreas Maos.</a>
+        </p>
+    </footer>
+
+    <script>
+        /* ================================================================
+        Triathlon Calculator Logic
+        ================================================================
+        */
+
+        // --- Constants & Config ---
+        const PRESETS = {
+            metric: {
+                sprint: { swim: 750, bike: 20, run: 5 },
+                olympic: { swim: 1500, bike: 40, run: 10 },
+                half: { swim: 1900, bike: 90, run: 21.1 },
+                full: { swim: 3800, bike: 180, run: 42.2 }
+            },
+            imperial: {
+                sprint: { swim: 820, bike: 12.4, run: 3.1 },
+                olympic: { swim: 1640, bike: 24.9, run: 6.2 },
+                half: { swim: 2078, bike: 56, run: 13.1 },
+                full: { swim: 4156, bike: 112, run: 26.2 }
+            }
+        };
+
+        const DROPDOWN_TEXTS = {
+            metric: {
+                sprint: "Sprint (750m / 20km / 5km)",
+                olympic: "Olympic (1.5km / 40km / 10km)",
+                half: "Half Ironman (1.9km / 90km / 21.1km)",
+                full: "Full Ironman (3.8km / 180km / 42.2km)",
+                custom: "Custom Distance"
+            },
+            imperial: {
+                sprint: "Sprint (820y / 12.4mi / 3.1mi)",
+                olympic: "Olympic (1640y / 24.9mi / 6.2mi)",
+                half: "Half Ironman (2078y / 56mi / 13.1mi)",
+                full: "Full Ironman (4156y / 112mi / 26.2mi)",
+                custom: "Custom Distance"
+            }
+        };
+
+        const LABELS = {
+            metric: { 
+                swim: 'm', bike: 'km', run: 'km', 
+                swimPace: 'Pace (mm:ss/100m)', runPace: 'Pace (mm:ss/km)', bikeSpeed: 'Speed (km/h)',
+                speedPlaceholder: 'Speed (km/h)'
+            },
+            imperial: { 
+                swim: 'y', bike: 'mi', run: 'mi', 
+                swimPace: 'Pace (mm:ss/100y)', runPace: 'Pace (mm:ss/mi)', bikeSpeed: 'Speed (mph)',
+                speedPlaceholder: 'Speed (mph)'
+            }
+        };
+
+        let currentUnit = 'metric';
+
+        // --- DOM Elements ---
+        // Inputs
+        const els = {
+            unitToggle: document.getElementById('unitToggle'),
+            presetSelect: document.getElementById('racePreset'),
+            dist: {
+                swim: document.getElementById('distSwim'),
+                bike: document.getElementById('distBike'),
+                run: document.getElementById('distRun')
+            },
+            labels: {
+                swim: document.getElementById('labelDistSwim'),
+                bike: document.getElementById('labelDistBike'),
+                run: document.getElementById('labelDistRun'),
+                swimPace: document.querySelector('#paceSwim').closest('.pace-wrapper'),
+                runPace: document.querySelector('#paceRun').closest('.pace-wrapper'),
+                bikeSpeed: document.getElementById('labelSpeedBikeWrapper')
+            },
+            pace: {
+                swim: document.getElementById('paceSwim'),
+                bike: document.getElementById('speedBike'),
+                run: document.getElementById('paceRun')
+            },
+            time: {
+                swim: document.getElementById('timeSwim'),
+                t1: document.getElementById('timeT1'),
+                bike: document.getElementById('timeBike'),
+                t2: document.getElementById('timeT2'),
+                run: document.getElementById('timeRun')
+            },
+            totalDisplay: document.getElementById('totalTimeDisplay'),
+            themeToggle: document.getElementById('themeToggle')
+        };
+
+        // --- Helper Functions: Time Formating ---
+
+        /**
+         * Converts total seconds to HH:MM:SS string
+         */
+        function secondsToHMS(totalSeconds) {
+            if (!totalSeconds || isNaN(totalSeconds) || totalSeconds < 0) return "";
+            
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = Math.floor(totalSeconds % 60);
+
+            const hDisplay = h < 10 ? "0" + h : h;
+            const mDisplay = m < 10 ? "0" + m : m;
+            const sDisplay = s < 10 ? "0" + s : s;
+            
+            return `${hDisplay}:${mDisplay}:${sDisplay}`;
+        }
+
+        /**
+         * Parses HH:MM:SS, MM:SS, or just SS string into total seconds
+         */
+        function parseTimeString(str) {
+            if (!str) return 0;
+            // Remove non-numeric/colon chars
+            str = str.replace(/[^\d:]/g, '');
+            const parts = str.split(':').map(Number);
+            
+            if (parts.length === 3) return (parts[0] * 3600) + (parts[1] * 60) + parts[2]; // HH:MM:SS
+            if (parts.length === 2) return (parts[0] * 60) + parts[1]; // MM:SS
+            if (parts.length === 1) return parts[0]; // Seconds or raw number
+            return 0;
+        }
+
+        /**
+         * Parses "MM:SS" strictly for pace inputs, returning seconds
+         */
+        function parsePaceString(str) {
+            return parseTimeString(str); // Same logic usually applies
+        }
+
+        // --- Core Logic: Calculations ---
+
+        function calculateSwimTime() {
+            // Formula: Time (sec) = (Distance / 100) * Pace (sec per 100)
+            const dist = parseFloat(els.dist.swim.value) || 0;
+            const paceSec = parsePaceString(els.pace.swim.value);
+            
+            if (dist > 0 && paceSec > 0) {
+                const totalSec = (dist / 100) * paceSec;
+                els.time.swim.value = secondsToHMS(totalSec);
+            }
+            updateTotal();
+        }
+
+        function calculateSwimPace() {
+            // Formula: Pace (sec per 100) = (Time (sec) * 100) / Distance
+            const dist = parseFloat(els.dist.swim.value) || 0;
+            const timeSec = parseTimeString(els.time.swim.value);
+
+            if (dist > 0 && timeSec > 0) {
+                const paceSec = (timeSec * 100) / dist;
+                els.pace.swim.value = secondsToHMS(paceSec).substring(3); // Remove HH: prefix for pace usually
+                // If pace is over an hour (unlikely for 100m), logic holds but display might be weird.
+                // Better formatting for pace (MM:SS):
+                const m = Math.floor(paceSec / 60);
+                const s = Math.floor(paceSec % 60);
+                els.pace.swim.value = `${m}:${s < 10 ? '0'+s : s}`;
+            }
+            updateTotal();
+        }
+
+        function calculateBikeTime() {
+            // Formula: Time (hours) = Distance / Speed
+            const dist = parseFloat(els.dist.bike.value) || 0;
+            const speed = parseFloat(els.pace.bike.value) || 0;
+
+            if (dist > 0 && speed > 0) {
+                const timeHours = dist / speed;
+                const timeSec = timeHours * 3600;
+                els.time.bike.value = secondsToHMS(timeSec);
+            }
+            updateTotal();
+        }
+
+        function calculateBikeSpeed() {
+            // Formula: Speed = Distance / Time (hours)
+            const dist = parseFloat(els.dist.bike.value) || 0;
+            const timeSec = parseTimeString(els.time.bike.value);
+
+            if (dist > 0 && timeSec > 0) {
+                const timeHours = timeSec / 3600;
+                const speed = dist / timeHours;
+                els.pace.bike.value = speed.toFixed(1);
+            }
+            updateTotal();
+        }
+
+        function calculateRunTime() {
+            // Formula: Time (sec) = Distance * Pace (sec per unit)
+            const dist = parseFloat(els.dist.run.value) || 0;
+            const paceSec = parsePaceString(els.pace.run.value);
+
+            if (dist > 0 && paceSec > 0) {
+                const totalSec = dist * paceSec;
+                els.time.run.value = secondsToHMS(totalSec);
+            }
+            updateTotal();
+        }
+
+        function calculateRunPace() {
+            // Formula: Pace (sec per unit) = Time (sec) / Distance
+            const dist = parseFloat(els.dist.run.value) || 0;
+            const timeSec = parseTimeString(els.time.run.value);
+
+            if (dist > 0 && timeSec > 0) {
+                const paceSec = timeSec / dist;
+                const m = Math.floor(paceSec / 60);
+                const s = Math.floor(paceSec % 60);
+                els.pace.run.value = `${m}:${s < 10 ? '0'+s : s}`;
+            }
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const tSwim = parseTimeString(els.time.swim.value);
+            const tT1 = parseTimeString(els.time.t1.value);
+            const tBike = parseTimeString(els.time.bike.value);
+            const tT2 = parseTimeString(els.time.t2.value);
+            const tRun = parseTimeString(els.time.run.value);
+
+            const total = tSwim + tT1 + tBike + tT2 + tRun;
+            els.totalDisplay.textContent = secondsToHMS(total) || "00:00:00";
+        }
+
+        // --- Event Handlers ---
+
+        function updateDropdownLabels() {
+            const options = els.presetSelect.options;
+            for (let i = 0; i < options.length; i++) {
+                const val = options[i].value;
+                if (DROPDOWN_TEXTS[currentUnit][val]) {
+                    options[i].textContent = DROPDOWN_TEXTS[currentUnit][val];
+                }
+            }
+        }
+
+        function handlePresetChange() {
+            const val = els.presetSelect.value;
+            if (val === 'custom') return; // Do not clear inputs, let user edit
+
+            const data = PRESETS[currentUnit][val];
+            els.dist.swim.value = data.swim;
+            els.dist.bike.value = data.bike;
+            els.dist.run.value = data.run;
+
+            // Trigger Recalculation of Times based on existing paces (if any)
+            if(els.pace.swim.value) calculateSwimTime();
+            if(els.pace.bike.value) calculateBikeTime();
+            if(els.pace.run.value) calculateRunTime();
+        }
+
+        function handleUnitToggle() {
+            currentUnit = els.unitToggle.checked ? 'imperial' : 'metric';
+            
+            // Update UI Labels
+            els.labels.swim.textContent = LABELS[currentUnit].swim;
+            els.labels.bike.textContent = LABELS[currentUnit].bike;
+            els.labels.run.textContent = LABELS[currentUnit].run;
+            
+            els.labels.swimPace.setAttribute('data-label', LABELS[currentUnit].swimPace);
+            els.labels.runPace.setAttribute('data-label', LABELS[currentUnit].runPace);
+            els.labels.bikeSpeed.setAttribute('data-label', LABELS[currentUnit].bikeSpeed);
+            
+            // Update Placeholder for Bike Speed
+            els.pace.bike.placeholder = LABELS[currentUnit].speedPlaceholder;
+
+            // Update Dropdown Text
+            updateDropdownLabels();
+
+            // Refill presets if a preset is selected (but not if custom)
+            if(els.presetSelect.value !== 'custom') {
+                handlePresetChange();
+            }
+            // Note: If 'Custom' is selected, we do NOT convert numbers, per requirements.
+        }
+
+        // --- Attach Listeners ---
+
+        // 1. Controls
+        els.unitToggle.addEventListener('change', handleUnitToggle);
+        els.presetSelect.addEventListener('change', handlePresetChange);
+
+        // 2. Distance Inputs (Recalculate Time, keep Pace)
+        els.dist.swim.addEventListener('input', () => { els.presetSelect.value = 'custom'; calculateSwimTime(); });
+        els.dist.bike.addEventListener('input', () => { els.presetSelect.value = 'custom'; calculateBikeTime(); });
+        els.dist.run.addEventListener('input', () => { els.presetSelect.value = 'custom'; calculateRunTime(); });
+
+        // 3. Pace/Speed Inputs (Calculate Time)
+        els.pace.swim.addEventListener('blur', calculateSwimTime); // Blur to allow typing "1:30" comfortably
+        els.pace.bike.addEventListener('input', calculateBikeTime);
+        els.pace.run.addEventListener('blur', calculateRunTime);
+
+        // 4. Time Inputs (Calculate Pace)
+        els.time.swim.addEventListener('blur', calculateSwimPace);
+        els.time.t1.addEventListener('blur', updateTotal); // T1 only affects total
+        els.time.bike.addEventListener('blur', calculateBikeSpeed);
+        els.time.t2.addEventListener('blur', updateTotal); // T2 only affects total
+        els.time.run.addEventListener('blur', calculateRunPace);
+        
+        // Enter key support for inputs
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') input.blur();
+            });
+        });
+
+
+        // --- UI Extras ---
+        
+        // Dark/Light Mode
+        els.themeToggle.addEventListener('click', () => {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            els.themeToggle.innerHTML = newTheme === 'light' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+        });
+
+        // Back to Top
+        const btnBackToTop = document.getElementById('btnBackToTop');
+        window.onscroll = function() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                btnBackToTop.style.display = "flex";
+            } else {
+                btnBackToTop.style.display = "none";
+            }
+        };
+        btnBackToTop.addEventListener('click', () => {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        });
+
+        // Initialize
+        updateDropdownLabels();
+        handlePresetChange(); // Set initial sprint values
+
+    </script>
+</body>
+</html>
