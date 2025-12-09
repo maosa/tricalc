@@ -417,8 +417,10 @@
             <div class="section-header">Race Distances</div>
             
             <select id="racePreset" class="preset-select">
+                <option value="super_sprint">Super Sprint</option>
                 <option value="sprint">Sprint</option>
-                <option value="olympic">Olympic</option>
+                <option value="olympic" selected>Olympic</option>
+                <option value="t100">T100</option>
                 <option value="half">Half Ironman</option>
                 <option value="full">Full Ironman</option>
                 <option value="custom">Custom Distance</option>
@@ -465,7 +467,8 @@
 
             <!-- SWIM -->
             <div class="calc-row">
-                <div class="sport-icon swim"><i class="fa-solid fa-person-swimming"></i> Swim</div>
+                <!-- Reverted to standard icon and added transform flip to make it face right -->
+                <div class="sport-icon swim"><i class="fa-solid fa-person-swimming" style="transform: scaleX(-1);"></i> Swim</div>
                 <div class="time-input-container pace-wrapper" data-label="Pace (mm:ss/100)">
                     <input type="text" id="paceSwim" placeholder="mm:ss / 100m">
                 </div>
@@ -542,14 +545,18 @@
         // --- Constants & Config ---
         const PRESETS = {
             metric: {
+                super_sprint: { swim: 400, bike: 10, run: 2.5 },
                 sprint: { swim: 750, bike: 20, run: 5 },
                 olympic: { swim: 1500, bike: 40, run: 10 },
+                t100: { swim: 2000, bike: 80, run: 18 },
                 half: { swim: 1900, bike: 90, run: 21.1 },
                 full: { swim: 3800, bike: 180, run: 42.2 }
             },
             imperial: {
+                super_sprint: { swim: 410, bike: 6.2, run: 1.5 },
                 sprint: { swim: 820, bike: 12.4, run: 3.1 },
                 olympic: { swim: 1640, bike: 24.9, run: 6.2 },
+                t100: { swim: 2187, bike: 49.7, run: 11.2 },
                 half: { swim: 2078, bike: 56, run: 13.1 },
                 full: { swim: 4156, bike: 112, run: 26.2 }
             }
@@ -557,15 +564,19 @@
 
         const DROPDOWN_TEXTS = {
             metric: {
+                super_sprint: "Super Sprint: Swim 400m | Bike 10km | Run 2.5km",
                 sprint: "Sprint: Swim 750m | Bike 20km | Run 5km",
                 olympic: "Olympic: Swim 1500m | Bike 40km | Run 10km",
+                t100: "T100: Swim 2000m | Bike 80km | Run 18km",
                 half: "Half Ironman - 70.3: Swim 1900m | Bike 90km | Run 21.1km",
                 full: "Full Ironman - 140.6: Swim 3800m | Bike 180km | Run 42.2km",
                 custom: "Custom Distance"
             },
             imperial: {
+                super_sprint: "Super Sprint: Swim 0.25mi/410y | Bike 6.2mi | Run 1.5mi",
                 sprint: "Sprint: Swim 0.5mi/820y | Bike 12.4mi | Run 3.1mi",
                 olympic: "Olympic: Swim 0.93mi/1640y | Bike 24.9mi | Run 6.2mi",
+                t100: "T100: Swim 1.24mi/2187y | Bike 49.7mi | Run 11.2mi",
                 half: "Half Ironman - 70.3: Swim 1.2mi/2078y | Bike 56mi | Run 13.1mi",
                 full: "Full Ironman - 140.6: Swim 2.4mi/4156y | Bike 112mi | Run 26.2mi",
                 custom: "Custom Distance"
@@ -872,7 +883,7 @@
 
         // Initialize
         updateDropdownLabels();
-        handlePresetChange(); // Set initial sprint values
+        handlePresetChange(); // Set initial values based on default selection (Olympic)
 
     </script>
 </body>
