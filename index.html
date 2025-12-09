@@ -362,6 +362,38 @@
         }
         .back-to-top:hover { transform: translateY(-3px); }
 
+        /* --- Footer & Socials --- */
+        footer {
+            text-align: center;
+            padding: 3rem 1rem 6rem 1rem; /* Bottom padding ensures content isn't hidden by back-to-top btn */
+            background-color: var(--bg-color);
+        }
+
+        .footer-text {
+            color: var(--text-muted); 
+            font-size: 0.8rem; 
+            margin-bottom: 1.5rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .social-links a {
+            color: var(--text-muted);
+            font-size: 1.8rem; /* Large enough for touch targets */
+            transition: color 0.3s, transform 0.2s;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            color: var(--accent-primary);
+            transform: translateY(-3px);
+        }
+
         /* --- Responsive --- */
         @media (max-width: 768px) {
             header { padding: 0.8rem 1rem; } /* Reduce header padding */
@@ -531,9 +563,14 @@
     </button>
 
     <footer>
-        <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0; padding: 0 1rem 100px 1rem;">
-            &copy; 2025 TriCalc. <a href="https://www.linkedin.com/in/andreas-maos/" target="_blank" style="color: inherit; text-decoration: none;">Created by Andreas Maos.</a> All rights reserved.
+        <p class="footer-text">
+            &copy; 2025 TriCalc. Created by Andreas Maos. All rights reserved.
         </p>
+        <div class="social-links">
+            <a href="https://www.instagram.com/maos.andreas" target="_blank" aria-label="Instagram"><i class="fa-brands fa-square-instagram"></i></a>
+            <a href="https://www.linkedin.com/in/andreas-maos/" target="_blank" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+            <a href="https://github.com/maosa" target="_blank" aria-label="GitHub"><i class="fa-brands fa-square-github"></i></a>
+        </div>
     </footer>
 
     <script>
