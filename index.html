@@ -15,14 +15,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Triathlon Time Calculator</title>
+    <title>TriCalc | Triathlon Time Calculator</title>
     <meta name="description" content="Free triathlon calculator to estimate race times for Sprint, Olympic, 70.3, and Ironman distances. Accurate swim, bike, and run time & pace calculator.">
     <meta name="google-site-verification" content="4fwjruOFX5Z9I-qIhlG2VvcpWhB-urEvuggTiccUKbo" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Updated from display=swap to display=optional to minimize Cumulative Layout Shift (CLS) per Lighthouse recommendations -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Poppins:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Poppins:wght@400;600;700&display=swap" type="text/css">
+    </noscript>
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -268,8 +272,10 @@
             -webkit-appearance: none;
             margin: 0;
         }
+
         input[type=number] {
             -moz-appearance: textfield; /* For Firefox */
+            appearance: textfield;
         }
 
         .unit-label {
@@ -433,13 +439,13 @@
         <div class="controls">
             <div class="switch-container">
                 <span>Metric</span>
-                <label class="toggle-switch">
+                <label class="toggle-switch" aria-label="Units switcher to toggle between Metric (default) and Imperial units">
                     <input type="checkbox" id="unitToggle">
                     <span class="slider"></span>
                 </label>
                 <span>Imperial</span>
             </div>
-            <button class="theme-btn" id="themeToggle"><i class="fa-solid fa-sun"></i></button>
+            <button class="theme-btn" id="themeToggle" aria-label="Theme (light / dark) toggle button"><i class="fa-solid fa-sun"></i></button>
         </div>
     </header>
 
@@ -448,7 +454,7 @@
         <section class="section-card">
             <div class="section-header">Race Distances</div>
             
-            <select id="racePreset" class="preset-select">
+            <select id="racePreset" class="preset-select" aria-label="Dropdown menu to select triathlon race type and distance">
                 <option value="super_sprint">Super Sprint</option>
                 <option value="sprint">Sprint</option>
                 <option value="olympic" selected>Olympic</option>
@@ -463,7 +469,7 @@
                 <div class="input-group">
                     <label>Swim</label>
                     <div class="input-wrapper">
-                        <input type="number" id="distSwim" step="any">
+                        <input type="number" id="distSwim" step="any" aria-label="Input field to add swim distance">
                         <span class="unit-label" id="labelDistSwim">m</span>
                     </div>
                 </div>
@@ -471,7 +477,7 @@
                 <div class="input-group">
                     <label>Bike</label>
                     <div class="input-wrapper">
-                        <input type="number" id="distBike" step="any">
+                        <input type="number" id="distBike" step="any" aria-label="Input field to add bike distance">
                         <span class="unit-label" id="labelDistBike">km</span>
                     </div>
                 </div>
@@ -479,7 +485,7 @@
                 <div class="input-group">
                     <label>Run</label>
                     <div class="input-wrapper">
-                        <input type="number" id="distRun" step="any">
+                        <input type="number" id="distRun" step="any" aria-label="Input field to add run distance">
                         <span class="unit-label" id="labelDistRun">km</span>
                     </div>
                 </div>
@@ -567,7 +573,7 @@
                     <img 
                         src="media/ironman_triathlon_logo.png" 
                         onerror="this.src='https://upload.wikimedia.org/wikipedia/en/d/df/Ironman_Triathlon_%28logo%29.svg'" 
-                        alt="Ironman Triathlon" 
+                        alt="Ironman Triathlon Logo" 
                         style="height: 100%; width: auto; object-fit: contain; filter: brightness(0.9);"
                     >
                 </a>
@@ -576,7 +582,7 @@
                     <img 
                         src="media/t100_triathlon_logo.webp" 
                         onerror="this.src='https://t100triathlon.com/wp-content/uploads/2024/12/t100-logo-full.svg'" 
-                        alt="T100 Triathlon World Tour" 
+                        alt="T100 Triathlon World Tour Logo" 
                         style="height: 100%; width: auto; object-fit: contain; filter: brightness(0.9);"
                     >
                 </a>
