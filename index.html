@@ -894,6 +894,28 @@
             // Note: If 'Custom' is selected, we do NOT convert numbers, per requirements.
         }
 
+        /**
+         * Smart Listener: Prevents rounding drift by only recalculating if the value 
+         * was actually changed by the user. This fixes the issue where tabbing 
+         * through fields triggers unnecessary recalculations based on rounded values.
+         */
+        function addSmartListener(element, eventType, handler) {
+            // On focus, store the current value (the "truth" before user interaction)
+            element.addEventListener('focus', (e) => {
+                e.target.dataset.originalValue = e.target.value;
+            });
+
+            element.addEventListener(eventType, (e) => {
+                // Only trigger the handler if the value is different from what it was on focus
+                // This prevents 'phantom' edits when just tabbing through
+                if (e.target.value !== e.target.dataset.originalValue) {
+                    handler();
+                    // Update originalValue so subsequent events don't re-trigger unnecessarily
+                    e.target.dataset.originalValue = e.target.value;
+                }
+            });
+        }
+
         // --- Attach Listeners ---
 
         // 1. Controls
@@ -901,21 +923,24 @@
         els.presetSelect.addEventListener('change', handlePresetChange);
 
         // 2. Distance Inputs (Recalculate Time, keep Pace)
-        els.dist.swim.addEventListener('input', () => { els.presetSelect.value = 'custom'; calculateSwimTime(); });
-        els.dist.bike.addEventListener('input', () => { els.presetSelect.value = 'custom'; calculateBikeTime(); });
-        els.dist.run.addEventListener('input', () => { els.presetSelect.value = 'custom'; calculateRunTime(); });
+        // These can use standard listeners as they flow one-way mostly, but smart is safer
+        addSmartListener(els.dist.swim, 'input', () => { els.presetSelect.value = 'custom'; calculateSwimTime(); });
+        addSmartListener(els.dist.bike, 'input', () => { els.presetSelect.value = 'custom'; calculateBikeTime(); });
+        addSmartListener(els.dist.run, 'input', () => { els.presetSelect.value = 'custom'; calculateRunTime(); });
 
         // 3. Pace/Speed Inputs (Calculate Time)
-        els.pace.swim.addEventListener('blur', calculateSwimTime); // Blur to allow typing "1:30" comfortably
-        els.pace.bike.addEventListener('input', calculateBikeTime);
-        els.pace.run.addEventListener('blur', calculateRunTime);
+        // Using 'blur' for text inputs (MM:SS) to allow typing, 'input' for number inputs
+        addSmartListener(els.pace.swim, 'blur', calculateSwimTime); 
+        addSmartListener(els.pace.bike, 'input', calculateBikeTime);
+        addSmartListener(els.pace.run, 'blur', calculateRunTime);
 
         // 4. Time Inputs (Calculate Pace)
-        els.time.swim.addEventListener('blur', calculateSwimPace);
-        els.time.t1.addEventListener('blur', updateTotal); // T1 only affects total
-        els.time.bike.addEventListener('blur', calculateBikeSpeed);
-        els.time.t2.addEventListener('blur', updateTotal); // T2 only affects total
-        els.time.run.addEventListener('blur', calculateRunPace);
+        // These are the critical ones for the "rounding drift" fix
+        addSmartListener(els.time.swim, 'blur', calculateSwimPace);
+        addSmartListener(els.time.t1, 'blur', updateTotal); // T1 only affects total
+        addSmartListener(els.time.bike, 'blur', calculateBikeSpeed);
+        addSmartListener(els.time.t2, 'blur', updateTotal); // T2 only affects total
+        addSmartListener(els.time.run, 'blur', calculateRunPace);
         
         // Enter key support for inputs
         document.querySelectorAll('input').forEach(input => {
