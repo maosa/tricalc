@@ -164,13 +164,6 @@ function parseTimeString(str) {
     return 0;
 }
 
-/**
- * Parses "MM:SS" strictly for pace inputs, returning seconds
- */
-function parsePaceString(str) {
-    return parseTimeString(str);
-}
-
 // --- Masked time/pace inputs (no colon typing required) ---
 
 /**
@@ -284,7 +277,7 @@ function makeMaskedTimeInput(input, format) {
 
 function calculateSwimTime() {
     const dist = parseFloat(els.dist.swim.value) || 0;
-    const paceSec = parsePaceString(els.pace.swim.value);
+    const paceSec = parseTimeString(els.pace.swim.value);
 
     if (dist > 0 && paceSec > 0) {
         const totalSec = (dist / 100) * paceSec;
@@ -330,7 +323,7 @@ function calculateBikeSpeed() {
 
 function calculateRunTime() {
     const dist = parseFloat(els.dist.run.value) || 0;
-    const paceSec = parsePaceString(els.pace.run.value);
+    const paceSec = parseTimeString(els.pace.run.value);
 
     if (dist > 0 && paceSec > 0) {
         const totalSec = dist * paceSec;
@@ -359,8 +352,6 @@ function updateTotal() {
 
     const total = tSwim + tT1 + tBike + tT2 + tRun;
     els.totalDisplay.textContent = secondsToHMS(total) || "00:00:00";
-
-    persistState();
 }
 
 // --- Persistence ---
@@ -417,7 +408,7 @@ function applyUnitLabels() {
 
 function handlePresetChange() {
     const val = els.presetSelect.value;
-    if (val === 'custom') { persistState(); return; }
+    if (val === 'custom') return;
 
     const data = PRESETS[currentUnit][val];
     els.dist.swim.value = data.swim;
@@ -428,8 +419,6 @@ function handlePresetChange() {
     if (els.pace.swim.value) calculateSwimTime();
     if (els.pace.bike.value) calculateBikeTime();
     if (els.pace.run.value) calculateRunTime();
-
-    persistState();
 }
 
 /**
@@ -447,7 +436,7 @@ function convertPacesAndSpeeds(fromUnit, toUnit) {
     const toImperial = (toUnit === 'imperial');
 
     if (els.pace.swim.value) {
-        const sec = parsePaceString(els.pace.swim.value);
+        const sec = parseTimeString(els.pace.swim.value);
         if (sec > 0) {
             const newSec = toImperial ? sec * 0.9144 : sec / 0.9144;
             els.pace.swim.value = secondsToPace(newSec);
@@ -463,7 +452,7 @@ function convertPacesAndSpeeds(fromUnit, toUnit) {
     }
 
     if (els.pace.run.value) {
-        const sec = parsePaceString(els.pace.run.value);
+        const sec = parseTimeString(els.pace.run.value);
         if (sec > 0) {
             const newSec = toImperial ? sec * 1.609344 : sec / 1.609344;
             els.pace.run.value = secondsToPace(newSec);
@@ -484,9 +473,9 @@ function handleUnitToggle() {
 
     if (els.presetSelect.value !== 'custom') {
         handlePresetChange();
-    } else {
-        persistState();
     }
+
+    persistState();
 }
 
 /**
@@ -535,7 +524,7 @@ addSmartListener(els.time.run, 'blur', calculateRunPace);
 
 // Enter key support for inputs
 document.querySelectorAll('input').forEach(input => {
-    input.addEventListener('keypress', (e) => {
+    input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') input.blur();
     });
 });
@@ -557,11 +546,6 @@ function getStoredTheme() {
 
 function setTheme(theme, persist) {
     document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : '');
-    if (theme === 'light') {
-        document.body.setAttribute('data-theme', 'light');
-    } else {
-        document.body.removeAttribute('data-theme');
-    }
     // Show the icon for the theme you'd switch TO (sun = currently light, click for dark)
     const useEl = els.themeToggle.querySelector('use');
     if (useEl) useEl.setAttribute('href', theme === 'light' ? '#i-moon' : '#i-sun');
@@ -579,7 +563,7 @@ function setTheme(theme, persist) {
 })();
 
 els.themeToggle.addEventListener('click', () => {
-    const current = document.body.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
     setTheme(current === 'light' ? 'dark' : 'light', true);
 });
 

@@ -206,11 +206,8 @@ main {
     outline: none;
     cursor: pointer;
 
-    /* Logic to force text wrapping */
     height: auto;
     min-height: 48px;
-    white-space: normal;
-    word-wrap: break-word;
     line-height: 1.4;
 
     /* Custom Appearance to support wrapping */
@@ -351,7 +348,6 @@ input[type=number] {
 
 /* --- Find Next Race section --- */
 .race-links-section { text-align: center; }
-.race-links-section .section-header { text-align: center; }
 
 .race-links {
     display: flex;
@@ -406,7 +402,7 @@ input[type=number] {
 /* --- Footer & Socials --- */
 footer {
     text-align: center;
-    padding: 3rem 1rem 3rem 1rem;
+    padding: 3rem 1rem;
     background-color: var(--bg-color);
 }
 
