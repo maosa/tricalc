@@ -1,0 +1,398 @@
+:root {
+    /* Dark Mode (Default) - Earthy/Pastel Theme */
+    --bg-color: #2b2b2b;       /* Soft Charcoal */
+    --card-bg: #363636;        /* Lighter Charcoal */
+    --text-main: #e3e3e3;      /* Bone White */
+    --text-muted: #a8a8a8;     /* Soft Grey */
+    --border-color: #4a4a4a;
+    --input-bg: #404040;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+    /* Sport Specific Colors (Pastel/Muted) */
+    --color-swim: #89CFF0;     /* Pastel Baby Blue */
+    --color-bike: #90EE90;     /* Pastel Light Green */
+    --color-run: #FFB347;      /* Pastel Orange */
+    --color-trans: #C0C0C0;    /* Silver/Grey */
+
+    --accent-primary: #d6d6d6; /* Light Grey */
+
+    --font-heading: 'Poppins', sans-serif;
+    --font-body: 'Open Sans', sans-serif;
+}
+
+[data-theme="light"] {
+    /* Light Mode - Earthy/Pastel Theme */
+    --bg-color: #f7f5f0;       /* Cream/Paper */
+    --card-bg: #ffffff;
+    --text-main: #4a4a4a;      /* Dark Slate */
+    --text-muted: #8c8c8c;
+    --border-color: #e0e0e0;
+    --input-bg: #fdfcf8;
+    --shadow: 0 4px 15px rgba(0,0,0,0.05);
+
+    /* Sport Colors (Slightly deeper for visibility on light) */
+    --color-swim: #5D9CEC;     /* Soft Blue */
+    --color-bike: #8CC152;     /* Grass Green */
+    --color-run: #F6BB42;      /* Warm Yellow/Orange */
+    --color-trans: #AAB2BD;    /* Blue Grey */
+
+    --accent-primary: #757575; /* Medium Grey (for contrast on light bg) */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s; }
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    scroll-behavior: smooth;
+}
+
+/* --- Header & Controls --- */
+header {
+    background-color: var(--card-bg);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+h1 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Toggle Switch Styling */
+.switch-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-muted);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: var(--accent-primary); border-color: var(--accent-primary); }
+input:checked + .slider:before { transform: translateX(26px); background-color: #fff; }
+
+.theme-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 0.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.theme-btn:hover { color: var(--accent-primary); border-color: var(--accent-primary); }
+
+/* --- Main Layout --- */
+main {
+    flex: 1;
+    width: 100%;
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* --- Sections --- */
+.section-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.section-header {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+/* --- Distance Inputs --- */
+.preset-select {
+    width: 100%;
+    padding: 0.8rem 2.5rem 0.8rem 0.8rem; /* Increased right padding for arrow */
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    border-radius: 8px;
+    font-family: var(--font-body);
+    margin-bottom: 1.5rem;
+    outline: none;
+    cursor: pointer;
+
+    /* Logic to force text wrapping */
+    height: auto;
+    min-height: 48px;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.4;
+
+    /* Custom Appearance to support wrapping (removes native UI restrictions) */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    /* Re-adding a custom arrow since appearance:none removes the default one */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+.preset-select:focus { border-color: var(--accent-primary); }
+
+.distance-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: var(--input-bg);
+    border: 1px solid transparent;
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    font-weight: 600;
+    outline: none;
+}
+
+.input-wrapper input:focus {
+    border-bottom-color: var(--accent-primary);
+}
+
+/* Remove default up/down arrows from number inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield; /* For Firefox */
+    appearance: textfield;
+}
+
+.unit-label {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    pointer-events: none; /* Ensures clicks pass through to the input */
+}
+
+/* --- Calculator Table --- */
+.calc-row {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1.5fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.calc-row:last-child { border-bottom: none; }
+.calc-row.header { font-family: var(--font-heading); font-weight: 600; color: var(--accent-primary); padding-bottom: 0.5rem; }
+
+.sport-icon {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+}
+.sport-icon i { width: 24px; text-align: center; font-size: 1.1rem; }
+
+/* Sport Specific Color Assignments */
+.sport-icon.swim i { color: var(--color-swim); }
+.sport-icon.bike i { color: var(--color-bike); }
+.sport-icon.run i { color: var(--color-run); }
+.sport-icon.trans i { color: var(--color-trans); }
+
+.time-input-container input {
+    width: 100%;
+    padding: 0.6rem;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-main);
+    text-align: center;
+    font-family: var(--font-body); /* Changed from monospace to fix wide spacing */
+    font-variant-numeric: tabular-nums; /* Ensures numbers still align perfectly */
+    font-size: 1rem;
+}
+.time-input-container input:focus { border-color: var(--accent-primary); outline: none; }
+
+.disabled-input { opacity: 0.3; pointer-events: none; border: none !important; background: transparent !important; }
+
+/* --- Total Time --- */
+.total-section {
+    text-align: center;
+    margin-top: 1rem;
+    background: var(--input-bg); /* Simplified background for earth theme */
+    border: 1px solid var(--accent-primary);
+}
+
+.total-label { font-size: 1rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+.total-display {
+    font-family: monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* --- Back to Top --- */
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: var(--accent-primary);
+    color: var(--bg-color); /* Changed to bg-color for better contrast against light grey accent */
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 99;
+}
+.back-to-top:hover { transform: translateY(-3px); }
+
+/* --- Footer & Socials --- */
+footer {
+    text-align: center;
+    padding: 3rem 1rem 6rem 1rem; /* Bottom padding ensures content isn't hidden by back-to-top btn */
+    background-color: var(--bg-color);
+}
+
+.footer-text {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    align-items: center;
+}
+
+.social-links a {
+    color: var(--text-muted);
+    font-size: 1.8rem; /* Large enough for touch targets */
+    transition: color 0.3s, transform 0.2s;
+    text-decoration: none;
+}
+
+.social-links a:hover {
+    color: var(--accent-primary);
+    transform: translateY(-3px);
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    header { padding: 0.8rem 1rem; } /* Reduce header padding */
+    h1 { font-size: 1.3rem; } /* Slightly smaller title */
+    .controls { gap: 0.5rem; } /* Tighter controls gap */
+    .switch-container { font-size: 0.8rem; } /* Smaller switch text */
+
+    /* Ensure dropdown font is legible but compact on mobile */
+    .preset-select { font-size: 0.9rem; }
+
+    .distance-grid { grid-template-columns: 1fr; }
+
+    .calc-row.header { display: none; } /* Hide header on mobile */
+
+    .calc-row {
+        grid-template-columns: 1fr;
+        grid-template-areas: "sport" "pace" "time";
+        background-color: var(--input-bg);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .sport-icon { grid-area: sport; margin-bottom: 0.5rem; font-size: 1.1rem; }
+
+    /* Add labels via pseudo-elements for mobile since header is hidden */
+    .pace-wrapper::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+    .time-wrapper::before { content: "Total Time"; display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+}
