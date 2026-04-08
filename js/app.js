@@ -66,14 +66,15 @@ const LABELS = {
 // localStorage keys (namespaced so they don't collide with anything else)
 const LS = {
     theme: 'tricalc.theme',
-    unit: 'tricalc.unit',
-    preset: 'tricalc.preset',
-    paceSwim: 'tricalc.paceSwim',
-    speedBike: 'tricalc.speedBike',
-    paceRun: 'tricalc.paceRun',
-    timeT1: 'tricalc.timeT1',
-    timeT2: 'tricalc.timeT2'
+    unit:  'tricalc.unit'
 };
+
+// Remove keys written by older versions of the app that we no longer persist.
+try {
+    ['tricalc.preset','tricalc.paceSwim','tricalc.speedBike',
+     'tricalc.paceRun','tricalc.timeT1','tricalc.timeT2']
+        .forEach(k => localStorage.removeItem(k));
+} catch (e) {}
 
 let currentUnit = 'metric';
 
@@ -367,25 +368,13 @@ function updateTotal() {
 function persistState() {
     try {
         localStorage.setItem(LS.unit, currentUnit);
-        localStorage.setItem(LS.preset, els.presetSelect.value);
-        localStorage.setItem(LS.paceSwim, els.pace.swim.value || '');
-        localStorage.setItem(LS.speedBike, els.pace.bike.value || '');
-        localStorage.setItem(LS.paceRun, els.pace.run.value || '');
-        localStorage.setItem(LS.timeT1, els.time.t1.value || '');
-        localStorage.setItem(LS.timeT2, els.time.t2.value || '');
     } catch (e) { /* localStorage may be unavailable in private mode */ }
 }
 
 function restoreState() {
-    let savedUnit, savedPreset, savedSwim, savedBike, savedRun, savedT1, savedT2;
+    let savedUnit;
     try {
         savedUnit = localStorage.getItem(LS.unit);
-        savedPreset = localStorage.getItem(LS.preset);
-        savedSwim = localStorage.getItem(LS.paceSwim);
-        savedBike = localStorage.getItem(LS.speedBike);
-        savedRun = localStorage.getItem(LS.paceRun);
-        savedT1 = localStorage.getItem(LS.timeT1);
-        savedT2 = localStorage.getItem(LS.timeT2);
     } catch (e) { return false; }
 
     if (savedUnit === 'imperial') {
@@ -394,16 +383,6 @@ function restoreState() {
         // Update labels/placeholders to imperial without re-converting numbers
         applyUnitLabels();
     }
-
-    if (savedPreset) {
-        els.presetSelect.value = savedPreset;
-    }
-
-    if (savedSwim) els.pace.swim.value = savedSwim;
-    if (savedBike) els.pace.bike.value = savedBike;
-    if (savedRun)  els.pace.run.value  = savedRun;
-    if (savedT1)   els.time.t1.value   = savedT1;
-    if (savedT2)   els.time.t2.value   = savedT2;
 
     return true;
 }
