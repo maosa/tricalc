@@ -39,7 +39,17 @@
     --accent-primary: #757575; /* Medium Grey (for contrast on light bg) */
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Theme transitions scoped to elements that actually change color/bg
+   on theme switch, instead of every element. Avoids button-press flicker
+   and the perf cost of a universal transition. */
+body, header, .section-card, .preset-select, .input-wrapper input,
+.time-input-container input, .total-section, .theme-btn, .slider,
+.section-header, .total-display {
+    transition: background-color 0.3s ease, color 0.3s ease,
+                border-color 0.3s ease;
+}
 
 body {
     font-family: var(--font-body);
@@ -50,6 +60,20 @@ body {
     flex-direction: column;
     scroll-behavior: smooth;
 }
+
+/* --- Inline SVG icons --- */
+.icon {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: -0.125em;
+}
+
+/* The Font Awesome swimmer faces left; flip horizontally so it faces
+   the same direction as the run icon. */
+.swim-icon { transform: scaleX(-1); }
 
 /* --- Header & Controls --- */
 header {
@@ -104,7 +128,7 @@ h1 {
     top: 0; left: 0; right: 0; bottom: 0;
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
-    transition: .4s;
+    transition: .3s;
     border-radius: 24px;
 }
 
@@ -116,7 +140,7 @@ h1 {
     left: 3px;
     bottom: 3px;
     background-color: var(--text-muted);
-    transition: .4s;
+    transition: .3s;
     border-radius: 50%;
 }
 
@@ -127,7 +151,7 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
     background: none;
     border: 1px solid var(--border-color);
     color: var(--text-main);
-    padding: 0.5rem;
+    padding: 0;
     border-radius: 50%;
     cursor: pointer;
     width: 40px;
@@ -135,6 +159,7 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.1rem;
 }
 .theme-btn:hover { color: var(--accent-primary); border-color: var(--accent-primary); }
 
@@ -160,6 +185,7 @@ main {
 .section-header {
     font-family: var(--font-heading);
     font-size: 1.2rem;
+    font-weight: 600;
     margin-bottom: 1rem;
     color: var(--text-main);
     border-bottom: 1px solid var(--border-color);
@@ -169,7 +195,7 @@ main {
 /* --- Distance Inputs --- */
 .preset-select {
     width: 100%;
-    padding: 0.8rem 2.5rem 0.8rem 0.8rem; /* Increased right padding for arrow */
+    padding: 0.8rem 2.5rem 0.8rem 0.8rem;
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
     color: var(--text-main);
@@ -187,12 +213,12 @@ main {
     word-wrap: break-word;
     line-height: 1.4;
 
-    /* Custom Appearance to support wrapping (removes native UI restrictions) */
+    /* Custom Appearance to support wrapping */
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
 
-    /* Re-adding a custom arrow since appearance:none removes the default one */
+    /* Custom dropdown arrow */
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 1rem center;
@@ -219,7 +245,7 @@ main {
 
 .input-wrapper input {
     width: 100%;
-    padding: 0.8rem;
+    padding: 0.8rem 2rem 0.8rem 0.8rem;
     background-color: var(--input-bg);
     border: 1px solid transparent;
     border-bottom: 2px solid var(--border-color);
@@ -241,7 +267,7 @@ input::-webkit-inner-spin-button {
 }
 
 input[type=number] {
-    -moz-appearance: textfield; /* For Firefox */
+    -moz-appearance: textfield;
     appearance: textfield;
 }
 
@@ -252,7 +278,7 @@ input[type=number] {
     transform: translateY(-50%);
     font-size: 0.8rem;
     color: var(--text-muted);
-    pointer-events: none; /* Ensures clicks pass through to the input */
+    pointer-events: none;
 }
 
 /* --- Calculator Table --- */
@@ -273,14 +299,15 @@ input[type=number] {
     align-items: center;
     gap: 12px;
     font-weight: 600;
+    font-size: 1.1rem;
 }
-.sport-icon i { width: 24px; text-align: center; font-size: 1.1rem; }
+.sport-icon .icon { width: 1.2em; height: 1.2em; }
 
 /* Sport Specific Color Assignments */
-.sport-icon.swim i { color: var(--color-swim); }
-.sport-icon.bike i { color: var(--color-bike); }
-.sport-icon.run i { color: var(--color-run); }
-.sport-icon.trans i { color: var(--color-trans); }
+.sport-icon.swim .icon { color: var(--color-swim); }
+.sport-icon.bike .icon { color: var(--color-bike); }
+.sport-icon.run  .icon { color: var(--color-run); }
+.sport-icon.trans .icon { color: var(--color-trans); }
 
 .time-input-container input {
     width: 100%;
@@ -290,8 +317,8 @@ input[type=number] {
     border-radius: 6px;
     color: var(--text-main);
     text-align: center;
-    font-family: var(--font-body); /* Changed from monospace to fix wide spacing */
-    font-variant-numeric: tabular-nums; /* Ensures numbers still align perfectly */
+    font-family: var(--font-body);
+    font-variant-numeric: tabular-nums;
     font-size: 1rem;
 }
 .time-input-container input:focus { border-color: var(--accent-primary); outline: none; }
@@ -302,43 +329,84 @@ input[type=number] {
 .total-section {
     text-align: center;
     margin-top: 1rem;
-    background: var(--input-bg); /* Simplified background for earth theme */
+    background: var(--input-bg);
     border: 1px solid var(--accent-primary);
 }
 
-.total-label { font-size: 1rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+.total-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
 .total-display {
-    font-family: monospace;
-    font-size: 3rem;
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
     font-weight: 700;
     color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
 }
 
-/* --- Back to Top --- */
-.back-to-top {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background-color: var(--accent-primary);
-    color: var(--bg-color); /* Changed to bg-color for better contrast against light grey accent */
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    display: none;
-    align-items: center;
+/* --- Find Next Race section --- */
+.race-links-section { text-align: center; }
+.race-links-section .section-header { text-align: center; }
+
+.race-links {
+    display: flex;
     justify-content: center;
-    font-size: 1.2rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    z-index: 99;
+    gap: 2rem;
+    align-items: center;
 }
-.back-to-top:hover { transform: translateY(-3px); }
+
+.race-link {
+    display: flex;
+    align-items: center;
+    height: 30px;
+    transition: opacity 0.3s;
+}
+.race-link:hover { opacity: 0.75; }
+
+.race-link img {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0.9);
+}
+
+/* --- TriPlan section --- */
+.triplan-section { text-align: center; padding: 1rem 1.5rem; }
+
+.triplan-link {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-main);
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+.triplan-link:hover { color: var(--accent-primary); }
+
+/* --- Focus visible (keyboard nav) --- */
+:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+/* Inputs already show their own focus border, so suppress the ring on them
+   to avoid a doubled outline */
+.input-wrapper input:focus-visible,
+.time-input-container input:focus-visible,
+.preset-select:focus-visible {
+    outline: none;
+}
 
 /* --- Footer & Socials --- */
 footer {
     text-align: center;
-    padding: 3rem 1rem 6rem 1rem; /* Bottom padding ensures content isn't hidden by back-to-top btn */
+    padding: 3rem 1rem 3rem 1rem;
     background-color: var(--bg-color);
 }
 
@@ -357,9 +425,10 @@ footer {
 
 .social-links a {
     color: var(--text-muted);
-    font-size: 1.8rem; /* Large enough for touch targets */
+    font-size: 1.8rem;
     transition: color 0.3s, transform 0.2s;
     text-decoration: none;
+    line-height: 0;
 }
 
 .social-links a:hover {
@@ -369,14 +438,19 @@ footer {
 
 /* --- Responsive --- */
 @media (max-width: 768px) {
-    header { padding: 0.8rem 1rem; } /* Reduce header padding */
-    h1 { font-size: 1.3rem; } /* Slightly smaller title */
-    .controls { gap: 0.5rem; } /* Tighter controls gap */
-    .switch-container { font-size: 0.8rem; } /* Smaller switch text */
+    header { padding: 0.8rem 1rem; }
+    h1 { font-size: 1.3rem; }
+    .controls { gap: 0.5rem; }
+    .switch-container { font-size: 0.8rem; }
 
-    .distance-grid { grid-template-columns: 1fr; }
+    /* Keep three-up distance grid on mobile but with tighter gap */
+    .distance-grid { gap: 0.5rem; }
+    .input-wrapper input {
+        padding: 0.7rem 1.6rem 0.7rem 0.6rem;
+    }
+    .unit-label { right: 6px; }
 
-    .calc-row.header { display: none; } /* Hide header on mobile */
+    .calc-row.header { display: none; }
 
     .calc-row {
         grid-template-columns: 1fr;
@@ -393,4 +467,6 @@ footer {
     /* Add labels via pseudo-elements for mobile since header is hidden */
     .pace-wrapper::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
     .time-wrapper::before { content: "Total Time"; display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+
+    .total-display { font-size: 2.75rem; }
 }
