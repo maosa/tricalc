@@ -14,12 +14,14 @@ const PRESETS = {
         full: { swim: 3800, bike: 180, run: 42.2 }
     },
     imperial: {
-        super_sprint: { swim: 410, bike: 6.2, run: 1.5 },
-        sprint: { swim: 820, bike: 12.4, run: 3.1 },
-        olympic: { swim: 1640, bike: 24.9, run: 6.2 },
-        t100: { swim: 2187, bike: 49.7, run: 11.2 },
-        half: { swim: 2078, bike: 56, run: 13.1 },
-        full: { swim: 4156, bike: 112, run: 26.2 }
+        // Super Sprint / Sprint / Olympic / T100: official metric distances converted to imperial
+        super_sprint: { swim: 437, bike: 6.21, run: 1.55 },
+        sprint: { swim: 820, bike: 12.43, run: 3.11 },
+        olympic: { swim: 1640, bike: 24.85, run: 6.21 },
+        t100: { swim: 2187, bike: 49.71, run: 11.18 },
+        // Half / Full Ironman: official imperial distances (1.2mi/56mi/13.1mi and 2.4mi/112mi/26.2mi)
+        half: { swim: 2112, bike: 56, run: 13.1 },
+        full: { swim: 4224, bike: 112, run: 26.2 }
     }
 };
 
@@ -34,12 +36,12 @@ const DROPDOWN_TEXTS = {
         custom: "Custom Distance"
     },
     imperial: {
-        super_sprint: "Super Sprint: Swim 0.25mi/410y | Bike 6.2mi | Run 1.5mi",
-        sprint: "Sprint: Swim 0.5mi/820y | Bike 12.4mi | Run 3.1mi",
-        olympic: "Olympic: Swim 0.93mi/1640y | Bike 24.9mi | Run 6.2mi",
-        t100: "T100: Swim 1.24mi/2187y | Bike 49.7mi | Run 11.2mi",
-        half: "Half Ironman - 70.3: Swim 1.2mi/2078y | Bike 56mi | Run 13.1mi",
-        full: "Full Ironman - 140.6: Swim 2.4mi/4156y | Bike 112mi | Run 26.2mi",
+        super_sprint: "Super Sprint: Swim 437y | Bike 6.21mi | Run 1.55mi",
+        sprint: "Sprint: Swim 820y | Bike 12.43mi | Run 3.11mi",
+        olympic: "Olympic: Swim 1640y | Bike 24.85mi | Run 6.21mi",
+        t100: "T100: Swim 2187y | Bike 49.71mi | Run 11.18mi",
+        half: "Half Ironman - 70.3: Swim 1.2mi/2112y | Bike 56mi | Run 13.1mi",
+        full: "Full Ironman - 140.6: Swim 2.4mi/4224y | Bike 112mi | Run 26.2mi",
         custom: "Custom Distance"
     }
 };
@@ -100,20 +102,35 @@ const els = {
 // --- Helper Functions: Time Formating ---
 
 /**
- * Converts total seconds to HH:MM:SS string
+ * Converts total seconds to HH:MM:SS string.
+ * Rounds the total before splitting so that values like 3599.7 carry up
+ * cleanly to 01:00:00 instead of being floor-truncated to 00:59:59.
  */
 function secondsToHMS(totalSeconds) {
     if (!totalSeconds || isNaN(totalSeconds) || totalSeconds < 0) return "";
 
+    totalSeconds = Math.round(totalSeconds);
+
     const h = Math.floor(totalSeconds / 3600);
     const m = Math.floor((totalSeconds % 3600) / 60);
-    const s = Math.floor(totalSeconds % 60);
+    const s = totalSeconds % 60;
 
     const hDisplay = h < 10 ? "0" + h : h;
     const mDisplay = m < 10 ? "0" + m : m;
     const sDisplay = s < 10 ? "0" + s : s;
 
     return `${hDisplay}:${mDisplay}:${sDisplay}`;
+}
+
+/**
+ * Formats a positive number of seconds as "M:SS" pace string.
+ * Rounds first so 119.7 becomes 2:00 instead of 1:59.
+ */
+function secondsToPace(totalSeconds) {
+    const total = Math.round(totalSeconds);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return `${m}:${s < 10 ? '0' + s : s}`;
 }
 
 /**
@@ -159,12 +176,7 @@ function calculateSwimPace() {
 
     if (dist > 0 && timeSec > 0) {
         const paceSec = (timeSec * 100) / dist;
-        els.pace.swim.value = secondsToHMS(paceSec).substring(3); // Remove HH: prefix for pace usually
-        // If pace is over an hour (unlikely for 100m), logic holds but display might be weird.
-        // Better formatting for pace (MM:SS):
-        const m = Math.floor(paceSec / 60);
-        const s = Math.floor(paceSec % 60);
-        els.pace.swim.value = `${m}:${s < 10 ? '0'+s : s}`;
+        els.pace.swim.value = secondsToPace(paceSec);
     }
     updateTotal();
 }
@@ -214,9 +226,7 @@ function calculateRunPace() {
 
     if (dist > 0 && timeSec > 0) {
         const paceSec = timeSec / dist;
-        const m = Math.floor(paceSec / 60);
-        const s = Math.floor(paceSec % 60);
-        els.pace.run.value = `${m}:${s < 10 ? '0'+s : s}`;
+        els.pace.run.value = secondsToPace(paceSec);
     }
     updateTotal();
 }
@@ -259,8 +269,60 @@ function handlePresetChange() {
     if(els.pace.run.value) calculateRunTime();
 }
 
+/**
+ * Converts the values currently in the pace/speed inputs from one unit
+ * system to the other so that toggling units preserves the user's
+ * physical pace/speed (a 5:00/km runner becomes an 8:03/mi runner).
+ *
+ * Conversion factors:
+ *   Swim: 100y = 91.44m, so sec/100y = sec/100m × 0.9144
+ *   Run:  1mi = 1.609344km, so sec/mi = sec/km × 1.609344
+ *   Bike: 1mph = 1.609344km/h, so mph = km/h × 0.621371
+ */
+function convertPacesAndSpeeds(fromUnit, toUnit) {
+    if (fromUnit === toUnit) return;
+    const toImperial = (toUnit === 'imperial');
+
+    // Swim pace
+    if (els.pace.swim.value) {
+        const sec = parsePaceString(els.pace.swim.value);
+        if (sec > 0) {
+            const newSec = toImperial ? sec * 0.9144 : sec / 0.9144;
+            els.pace.swim.value = secondsToPace(newSec);
+        }
+    }
+
+    // Bike speed
+    if (els.pace.bike.value) {
+        const speed = parseFloat(els.pace.bike.value);
+        if (speed > 0) {
+            const newSpeed = toImperial ? speed * 0.621371 : speed * 1.609344;
+            els.pace.bike.value = newSpeed.toFixed(1);
+        }
+    }
+
+    // Run pace
+    if (els.pace.run.value) {
+        const sec = parsePaceString(els.pace.run.value);
+        if (sec > 0) {
+            const newSec = toImperial ? sec * 1.609344 : sec / 1.609344;
+            els.pace.run.value = secondsToPace(newSec);
+        }
+    }
+}
+
 function handleUnitToggle() {
-    currentUnit = els.unitToggle.checked ? 'imperial' : 'metric';
+    const newUnit = els.unitToggle.checked ? 'imperial' : 'metric';
+    if (newUnit === currentUnit) return;
+
+    // Convert paces/speeds so the user's physical effort is preserved
+    // across the toggle. Skipped in 'custom' mode where the contract is
+    // that we never touch the user's numbers.
+    if (els.presetSelect.value !== 'custom') {
+        convertPacesAndSpeeds(currentUnit, newUnit);
+    }
+
+    currentUnit = newUnit;
 
     // Update UI Labels
     els.labels.swim.textContent = LABELS[currentUnit].swim;
@@ -279,8 +341,10 @@ function handleUnitToggle() {
     // Update Dropdown Text
     updateDropdownLabels();
 
-    // Refill presets if a preset is selected (but not if custom)
-    if(els.presetSelect.value !== 'custom') {
+    // Refill presets if a preset is selected (but not if custom).
+    // handlePresetChange will recompute times from the converted paces and
+    // new preset distances, so the displayed total stays consistent.
+    if (els.presetSelect.value !== 'custom') {
         handlePresetChange();
     }
     // Note: If 'Custom' is selected, we do NOT convert numbers, per requirements.
