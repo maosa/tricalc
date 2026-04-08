@@ -134,14 +134,19 @@ function secondsToHMS(totalSeconds) {
 }
 
 /**
- * Formats a positive number of seconds as "M:SS" pace string.
- * Rounds first so 119.7 becomes 2:00 instead of 1:59.
+ * Formats a positive number of seconds as a zero-padded "MM:SS" pace string.
+ * Rounds first so 119.7 becomes 02:00 instead of 01:59. Minutes are padded
+ * (rather than rendered as "M:SS") so the displayed format matches the
+ * masked-input format used by makeMaskedTimeInput — otherwise blurring after
+ * a calc would visibly flicker between "01:30" and "1:30".
  */
 function secondsToPace(totalSeconds) {
     const total = Math.round(totalSeconds);
     const m = Math.floor(total / 60);
     const s = total % 60;
-    return `${m}:${s < 10 ? '0' + s : s}`;
+    const mDisplay = m < 10 ? '0' + m : m;
+    const sDisplay = s < 10 ? '0' + s : s;
+    return `${mDisplay}:${sDisplay}`;
 }
 
 /**
@@ -165,90 +170,113 @@ function parsePaceString(str) {
     return parseTimeString(str);
 }
 
-// --- Auto-format helpers (so phone users never have to type a colon) ---
+// --- Masked time/pace inputs (no colon typing required) ---
 
 /**
- * Normalize a pace-like string (M:SS or MM:SS) on blur.
+ * Right-to-left masked input for MM:SS and HH:MM:SS fields.
  *
- *   "530"   -> "5:30"     (last 2 digits = seconds, rest = minutes)
- *   "45"    -> "0:45"
- *   "5:3"   -> "5:03"     (zero-pad seconds)
- *   "5:30"  -> "5:30"     (already valid, untouched)
+ * Each digit the user types shifts in from the right, exactly like an
+ * ATM or microwave time entry:
  *
- * Inputs already containing a colon are treated as user-typed and just
- * normalized via parsePaceString -> secondsToPace so we don't surprise
- * desktop users who typed it the "right" way.
+ *   ""  → 1 → "00:01" → 3 → "00:13" → 0 → "01:30" → 7 → "13:07"
+ *
+ * Once the field is at maxDigits, additional keystrokes are dropped
+ * (the user must backspace to make room). Backspace pops the rightmost
+ * digit; the field stays in canonical zero-padded format throughout.
+ *
+ * Implementation notes:
+ *
+ *   - We store the user's typed digits separately on the element
+ *     (`_typedDigits`) and re-render the visible value from that on
+ *     every keystroke. The visible value is always padded to maxDigits.
+ *   - On focus we resync `_typedDigits` from `input.value`, so external
+ *     writes (calc functions, restoreState, preset changes) don't desync
+ *     the digit state. Leading zeros are stripped during resync — they
+ *     are padding, not user input, and shouldn't eat into the digit cap.
+ *   - Selection-replace ("select all + type a digit") is handled via a
+ *     beforeinput flag so the new digit replaces rather than appends.
+ *   - The cursor is forced to the end on focus, click, and after every
+ *     render — there's no notion of editing in the middle of a masked
+ *     field.
+ *   - We rely on InputEvent.data and inputType, both supported in modern
+ *     iOS Safari and Chrome — soft keyboards do not fire keydown reliably.
  */
-function formatPaceOnBlur(input) {
-    const raw = input.value.trim();
-    if (!raw) return;
+function makeMaskedTimeInput(input, format) {
+    const maxDigits = format === 'hhmmss' ? 6 : 4;
 
-    if (raw.includes(':')) {
-        const sec = parsePaceString(raw);
-        if (sec > 0) input.value = secondsToPace(sec);
-        return;
-    }
-
-    const digits = raw.replace(/\D/g, '');
-    if (!digits) { input.value = ''; return; }
-
-    let totalSec;
-    if (digits.length <= 2) {
-        totalSec = parseInt(digits, 10);
-    } else {
-        const seconds = parseInt(digits.slice(-2), 10);
-        const minutes = parseInt(digits.slice(0, -2), 10);
-        totalSec = minutes * 60 + seconds;
-    }
-    input.value = secondsToPace(totalSec);
-}
-
-/**
- * Normalize a time-like string (HH:MM:SS / MM:SS) on blur.
- *
- *   "12030" -> "1:20:30"  (last 2 = seconds, next 2 = minutes, rest = hours)
- *   "4500"  -> "45:00"
- *   "30"    -> "0:30"
- *   "1:5:9" -> "1:05:09"  (zero-pad)
- *
- * Always renders MM:SS for sub-hour values, HH:MM:SS otherwise. The
- * downstream parseTimeString accepts both, so calc logic is unaffected.
- */
-function formatTimeOnBlur(input) {
-    const raw = input.value.trim();
-    if (!raw) return;
-
-    let totalSec;
-    if (raw.includes(':')) {
-        totalSec = parseTimeString(raw);
-    } else {
-        const digits = raw.replace(/\D/g, '');
-        if (!digits) { input.value = ''; return; }
-
-        if (digits.length <= 2) {
-            totalSec = parseInt(digits, 10);
-        } else if (digits.length <= 4) {
-            const seconds = parseInt(digits.slice(-2), 10);
-            const minutes = parseInt(digits.slice(0, -2), 10);
-            totalSec = minutes * 60 + seconds;
-        } else {
-            const seconds = parseInt(digits.slice(-2), 10);
-            const minutes = parseInt(digits.slice(-4, -2), 10);
-            const hours = parseInt(digits.slice(0, -4), 10);
-            totalSec = hours * 3600 + minutes * 60 + seconds;
+    function render(digits) {
+        if (!digits) return '';
+        const padded = digits.padStart(maxDigits, '0');
+        if (format === 'mmss') {
+            return padded.slice(0, 2) + ':' + padded.slice(2, 4);
         }
+        return padded.slice(0, 2) + ':' + padded.slice(2, 4) + ':' + padded.slice(4, 6);
     }
 
-    if (totalSec <= 0) { input.value = ''; return; }
-
-    // Sub-hour values render as MM:SS for compactness; otherwise HH:MM:SS.
-    if (totalSec < 3600) {
-        const m = Math.floor(totalSec / 60);
-        const s = totalSec % 60;
-        input.value = `${m}:${s < 10 ? '0' + s : s}`;
-    } else {
-        input.value = secondsToHMS(totalSec);
+    // Strip the value down to its meaningful digits, dropping leading
+    // zeros (which are display padding, not user-typed digits) so the
+    // user has the full digit cap available after a calc-driven write.
+    function digitsFromValue(val) {
+        const raw = (val || '').replace(/\D/g, '');
+        const trimmed = raw.replace(/^0+/, '');
+        return trimmed.slice(-maxDigits);
     }
+
+    function moveCaretToEnd() {
+        const len = input.value.length;
+        try { input.setSelectionRange(len, len); } catch (e) { /* no-op */ }
+    }
+
+    // Initialize from any pre-existing value (HTML default, restored
+    // state, calc output)
+    input._typedDigits = digitsFromValue(input.value);
+    if (input._typedDigits) input.value = render(input._typedDigits);
+
+    // Track non-collapsed selections so "select-all + type" replaces
+    // rather than appends. The selection has already been collapsed by
+    // the time `input` fires, so we have to capture it earlier.
+    input.addEventListener('beforeinput', () => {
+        if (input.selectionStart !== input.selectionEnd) {
+            input._maskClearOnNext = true;
+        }
+    });
+
+    input.addEventListener('input', (e) => {
+        let digits = input._maskClearOnNext ? '' : (input._typedDigits || '');
+        input._maskClearOnNext = false;
+
+        if (e.inputType && e.inputType.indexOf('delete') === 0) {
+            digits = digits.slice(0, -1);
+        } else if (e.data) {
+            // Append digit characters from e.data, dropping anything
+            // past maxDigits. Non-digit chars (e.g. from a paste) are
+            // skipped silently.
+            for (const ch of e.data) {
+                if (digits.length >= maxDigits) break;
+                if (/\d/.test(ch)) digits += ch;
+            }
+        } else {
+            // Some other inputType with no data (undo/redo, etc.) —
+            // fall back to whatever digits are in the current value.
+            digits = digitsFromValue(input.value);
+        }
+
+        input._typedDigits = digits;
+        input.value = render(digits);
+        moveCaretToEnd();
+    });
+
+    // External writes (calc, restoreState, preset change) bypass the
+    // input event, so resync digit state whenever the user re-enters
+    // the field.
+    input.addEventListener('focus', () => {
+        input._typedDigits = digitsFromValue(input.value);
+        // Defer the caret move so it lands after the browser's own
+        // focus-time cursor placement.
+        requestAnimationFrame(moveCaretToEnd);
+    });
+
+    input.addEventListener('click', moveCaretToEnd);
 }
 
 // --- Core Logic: Calculations ---
@@ -512,18 +540,14 @@ addSmartListener(els.dist.bike, 'input', () => { els.presetSelect.value = 'custo
 addSmartListener(els.dist.run, 'input', () => { els.presetSelect.value = 'custom'; calculateRunTime(); });
 
 // 3. Pace/Speed Inputs (Calculate Time)
-// Auto-format pace text inputs on blur, then calculate.
-els.pace.swim.addEventListener('blur', () => formatPaceOnBlur(els.pace.swim));
-els.pace.run.addEventListener('blur', () => formatPaceOnBlur(els.pace.run));
+// Pace inputs use the right-to-left mask, so no on-blur reformatting
+// is needed — the value is already in canonical MM:SS form. Bike speed
+// is a plain decimal number, no mask.
 addSmartListener(els.pace.swim, 'blur', calculateSwimTime);
 addSmartListener(els.pace.bike, 'input', calculateBikeTime);
 addSmartListener(els.pace.run, 'blur', calculateRunTime);
 
 // 4. Time Inputs (Calculate Pace)
-// Auto-format time text inputs on blur, then calculate.
-[els.time.swim, els.time.t1, els.time.bike, els.time.t2, els.time.run].forEach(input => {
-    input.addEventListener('blur', () => formatTimeOnBlur(input));
-});
 addSmartListener(els.time.swim, 'blur', calculateSwimPace);
 addSmartListener(els.time.t1, 'blur', updateTotal);
 addSmartListener(els.time.bike, 'blur', calculateBikeSpeed);
@@ -591,3 +615,15 @@ applyUnitLabels();
 
 // 3. Fill distances for the current preset and recompute times
 handlePresetChange();
+
+// 4. Wire up the right-to-left masked input on every time/pace field.
+//    Done last so the mask picks up whatever values restoreState +
+//    handlePresetChange just wrote into them. Bike speed (els.pace.bike)
+//    stays unmasked because it's a plain decimal, not a time format.
+makeMaskedTimeInput(els.pace.swim, 'mmss');
+makeMaskedTimeInput(els.pace.run,  'mmss');
+makeMaskedTimeInput(els.time.swim, 'hhmmss');
+makeMaskedTimeInput(els.time.t1,   'mmss');
+makeMaskedTimeInput(els.time.bike, 'hhmmss');
+makeMaskedTimeInput(els.time.t2,   'mmss');
+makeMaskedTimeInput(els.time.run,  'hhmmss');
