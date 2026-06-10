@@ -1,42 +1,42 @@
 :root {
-    /* Dark Mode (Default) - Cool Premium Dark */
-    --bg-color: #161620;
-    --card-bg: #1e1e2a;
-    --text-main: #e0e0f0;
-    --text-muted: #8080a8;
-    --border-color: #26263a;
-    --input-bg: #13131e;
+    /* Dark Mode (Default) - Neutral Dark */
+    --bg-color: #131315;
+    --card-bg: #1c1c1f;
+    --text-main: #e5e5e8;
+    --text-muted: #8c8c96;
+    --border-color: #27272b;
+    --input-bg: #0f0f11;
     --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
 
     /* Sport Specific Colors */
     --color-swim: #5ab8ff;
     --color-bike: #52cc6e;
     --color-run: #ff8040;
-    --color-trans: #9898b8;
+    --color-trans: #606070;
 
-    --accent-primary: #c0c0e8;
+    --accent-primary: #b0b0bc;
 
     --font-heading: 'Poppins', sans-serif;
     --font-body: 'Open Sans', sans-serif;
 }
 
 [data-theme="light"] {
-    /* Light Mode - Clean Cool White */
-    --bg-color: #f0f0f8;
+    /* Light Mode - Clean Neutral White */
+    --bg-color: #f5f5f7;
     --card-bg: #ffffff;
-    --text-main: #1a1a2e;
-    --text-muted: #7070a0;
-    --border-color: #d8d8f0;
-    --input-bg: #fafafe;
-    --shadow: 0 2px 16px rgba(0, 0, 32, 0.09);
+    --text-main: #1c1c1e;
+    --text-muted: #6e6e76;
+    --border-color: #d4d4d8;
+    --input-bg: #f9f9fb;
+    --shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
 
     /* Sport Colors (deeper for visibility on light) */
     --color-swim: #2f88e0;
     --color-bike: #35aa55;
     --color-run: #e05a14;
-    --color-trans: #8888b0;
+    --color-trans: #909098;
 
-    --accent-primary: #4a4a8a;
+    --accent-primary: #3c3c43;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,7 +46,7 @@
    and the perf cost of a universal transition. */
 body, header, footer, .section-card, .preset-select, .input-wrapper input,
 .time-input-container input, .total-section, .theme-btn, .slider,
-.section-header, .total-display, .race-link, .triplan-link {
+.section-header, .total-display, .triplan-link {
     transition: background-color 0.3s ease, color 0.3s ease,
                 border-color 0.3s ease;
 }
@@ -92,10 +92,7 @@ h1 {
     font-family: var(--font-heading);
     font-size: 1.5rem;
     font-weight: 700;
-    background: linear-gradient(110deg, var(--color-swim) 0%, var(--color-bike) 50%, var(--color-run) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-main);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -221,7 +218,7 @@ main {
     -moz-appearance: none;
 
     /* Custom dropdown arrow */
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238080a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c8c96' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 1em;
@@ -354,10 +351,8 @@ input[type=number] {
 .total-section {
     text-align: center;
     margin-top: 1rem;
-    background:
-        linear-gradient(var(--input-bg), var(--input-bg)) padding-box,
-        linear-gradient(135deg, var(--color-swim) 0%, var(--color-bike) 50%, var(--color-run) 100%) border-box;
-    border: 2px solid transparent;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
 }
 
 .total-label {
@@ -402,16 +397,16 @@ input[type=number] {
     justify-content: center;
     height: auto;
     padding: 1rem 1.5rem;
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 10px;
-    background-color: var(--input-bg);
-    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: #f2f2f4;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     text-decoration: none;
 }
 .race-link:hover {
-    border-color: var(--accent-primary);
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    border-color: rgba(0, 0, 0, 0.15);
     opacity: 1;
 }
 
