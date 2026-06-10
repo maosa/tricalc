@@ -46,7 +46,7 @@
    and the perf cost of a universal transition. */
 body, header, footer, .section-card, .preset-select, .input-wrapper input,
 .time-input-container input, .total-section, .theme-btn, .slider,
-.section-header, .total-display, .triplan-link {
+.section-header, .total-display, .triplan-link, .calc-row:not(.header) {
     transition: background-color 0.3s ease, color 0.3s ease,
                 border-color 0.3s ease;
 }
@@ -280,25 +280,39 @@ input[type=number] {
     pointer-events: none;
 }
 
-/* --- Calculator Table --- */
+/* --- Calculator rows container --- */
+.calc-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* --- Calculator rows --- */
 .calc-row {
     display: grid;
     grid-template-columns: 1fr 1.5fr 1.5fr;
     gap: 1rem;
     align-items: center;
-    padding: 1rem 0 1rem 0.875rem;
-    border-bottom: 1px solid var(--border-color);
     border-left: 3px solid transparent;
     transition: background-color 0.2s ease, border-left-color 0.3s ease;
 }
 
-.calc-row:last-child { border-bottom: none; }
+/* Header: plain column labels, no card background */
 .calc-row.header {
     font-family: var(--font-heading);
     font-weight: 600;
     color: var(--accent-primary);
-    padding-bottom: 0.5rem;
+    padding: 0.25rem 0 0.5rem 1rem;
     border-left-color: transparent;
+}
+
+/* Data rows: each is a standalone card */
+.calc-row:not(.header) {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.875rem 1rem;
+    border-left: 3px solid transparent;
 }
 
 /* Sport accent strips */
@@ -309,11 +323,10 @@ input[type=number] {
 
 /* Hover state on data rows */
 .calc-row:not(.header):hover {
-    background-color: rgba(255, 255, 255, 0.03);
-    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.04);
 }
 [data-theme="light"] .calc-row:not(.header):hover {
-    background-color: rgba(0, 0, 30, 0.03);
+    background-color: rgba(0, 0, 0, 0.03);
 }
 
 .sport-icon {
@@ -397,18 +410,21 @@ input[type=number] {
     justify-content: center;
     height: auto;
     padding: 1rem 1.5rem;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 10px;
-    background-color: #f2f2f4;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: #dcdce0;   /* dark mode: softer light grey */
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
     text-decoration: none;
 }
 .race-link:hover {
+    background-color: #d0d0d4;
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    border-color: rgba(0, 0, 0, 0.15);
+    border-color: rgba(0, 0, 0, 0.12);
     opacity: 1;
 }
+[data-theme="light"] .race-link { background-color: #f4f4f6; border-color: rgba(0, 0, 0, 0.08); }
+[data-theme="light"] .race-link:hover { background-color: #ebebed; }
 
 .race-link img {
     height: 28px;
@@ -501,22 +517,12 @@ footer {
 
     .calc-row.header { display: none; }
 
-    .calc-row {
+    .calc-row:not(.header) {
         grid-template-columns: 1fr;
         grid-template-areas: "sport" "pace" "time";
-        background-color: var(--input-bg);
-        border-radius: 8px;
         padding: 1rem;
-        margin-bottom: 1rem;
-        border: 1px solid var(--border-color);
-        border-left: 3px solid transparent;
+        /* background, border, border-radius, border-left inherited from base styles */
     }
-
-    /* Sport accent strips override the mobile card border-left */
-    .calc-row.swim-row { border-left-color: var(--color-swim); }
-    .calc-row.bike-row { border-left-color: var(--color-bike); }
-    .calc-row.run-row  { border-left-color: var(--color-run); }
-    .calc-row.trans-row{ border-left-color: var(--color-trans); }
 
     .sport-icon { grid-area: sport; margin-bottom: 0.5rem; font-size: 1.1rem; }
 
