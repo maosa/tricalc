@@ -352,6 +352,8 @@ function updateTotal() {
 
     const total = tSwim + tT1 + tBike + tT2 + tRun;
     els.totalDisplay.textContent = secondsToHMS(total) || "00:00:00";
+    els.totalDisplay.classList.remove('updating');
+    requestAnimationFrame(() => els.totalDisplay.classList.add('updating'));
 }
 
 // --- Persistence ---
@@ -522,8 +524,13 @@ addSmartListener(els.time.bike, 'blur', calculateBikeSpeed);
 addSmartListener(els.time.t2, 'blur', updateTotal);
 addSmartListener(els.time.run, 'blur', calculateRunPace);
 
-// Enter key support for inputs
-document.querySelectorAll('input').forEach(input => {
+// Enter key support for inputs — use cached els to avoid redundant DOM query
+const allInputs = [
+    ...Object.values(els.dist),
+    ...Object.values(els.pace),
+    ...Object.values(els.time)
+];
+allInputs.forEach(input => {
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') input.blur();
     });

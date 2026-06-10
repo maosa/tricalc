@@ -1,42 +1,42 @@
 :root {
-    /* Dark Mode (Default) - Earthy/Pastel Theme */
-    --bg-color: #2b2b2b;       /* Soft Charcoal */
-    --card-bg: #363636;        /* Lighter Charcoal */
-    --text-main: #e3e3e3;      /* Bone White */
-    --text-muted: #a8a8a8;     /* Soft Grey */
-    --border-color: #4a4a4a;
-    --input-bg: #404040;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    /* Dark Mode (Default) - Cool Premium Dark */
+    --bg-color: #161620;
+    --card-bg: #1e1e2a;
+    --text-main: #e0e0f0;
+    --text-muted: #8080a8;
+    --border-color: #26263a;
+    --input-bg: #13131e;
+    --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
 
-    /* Sport Specific Colors (Pastel/Muted) */
-    --color-swim: #89CFF0;     /* Pastel Baby Blue */
-    --color-bike: #90EE90;     /* Pastel Light Green */
-    --color-run: #FFB347;      /* Pastel Orange */
-    --color-trans: #C0C0C0;    /* Silver/Grey */
+    /* Sport Specific Colors */
+    --color-swim: #5ab8ff;
+    --color-bike: #52cc6e;
+    --color-run: #ff8040;
+    --color-trans: #9898b8;
 
-    --accent-primary: #d6d6d6; /* Light Grey */
+    --accent-primary: #c0c0e8;
 
     --font-heading: 'Poppins', sans-serif;
     --font-body: 'Open Sans', sans-serif;
 }
 
 [data-theme="light"] {
-    /* Light Mode - Earthy/Pastel Theme */
-    --bg-color: #f7f5f0;       /* Cream/Paper */
+    /* Light Mode - Clean Cool White */
+    --bg-color: #f0f0f8;
     --card-bg: #ffffff;
-    --text-main: #4a4a4a;      /* Dark Slate */
-    --text-muted: #8c8c8c;
-    --border-color: #e0e0e0;
-    --input-bg: #fdfcf8;
-    --shadow: 0 4px 15px rgba(0,0,0,0.05);
+    --text-main: #1a1a2e;
+    --text-muted: #7070a0;
+    --border-color: #d8d8f0;
+    --input-bg: #fafafe;
+    --shadow: 0 2px 16px rgba(0, 0, 32, 0.09);
 
-    /* Sport Colors (Slightly deeper for visibility on light) */
-    --color-swim: #5D9CEC;     /* Soft Blue */
-    --color-bike: #8CC152;     /* Grass Green */
-    --color-run: #F6BB42;      /* Warm Yellow/Orange */
-    --color-trans: #AAB2BD;    /* Blue Grey */
+    /* Sport Colors (deeper for visibility on light) */
+    --color-swim: #2f88e0;
+    --color-bike: #35aa55;
+    --color-run: #e05a14;
+    --color-trans: #8888b0;
 
-    --accent-primary: #757575; /* Medium Grey (for contrast on light bg) */
+    --accent-primary: #4a4a8a;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,9 +44,9 @@
 /* Theme transitions scoped to elements that actually change color/bg
    on theme switch, instead of every element. Avoids button-press flicker
    and the perf cost of a universal transition. */
-body, header, .section-card, .preset-select, .input-wrapper input,
+body, header, footer, .section-card, .preset-select, .input-wrapper input,
 .time-input-container input, .total-section, .theme-btn, .slider,
-.section-header, .total-display {
+.section-header, .total-display, .race-link, .triplan-link {
     transition: background-color 0.3s ease, color 0.3s ease,
                 border-color 0.3s ease;
 }
@@ -92,7 +92,10 @@ h1 {
     font-family: var(--font-heading);
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--accent-primary);
+    background: linear-gradient(110deg, var(--color-swim) 0%, var(--color-bike) 50%, var(--color-run) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -162,6 +165,8 @@ input:checked + .slider:before { transform: translateX(26px); background-color: 
     font-size: 1.1rem;
 }
 .theme-btn:hover { color: var(--accent-primary); border-color: var(--accent-primary); }
+.theme-btn svg { transition: transform 0.35s ease, opacity 0.25s ease; }
+.theme-btn:hover svg { transform: rotate(20deg); }
 
 /* --- Main Layout --- */
 main {
@@ -175,7 +180,7 @@ main {
 /* --- Sections --- */
 .section-card {
     background-color: var(--card-bg);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 1.5rem;
     margin-bottom: 2rem;
     box-shadow: var(--shadow);
@@ -216,7 +221,7 @@ main {
     -moz-appearance: none;
 
     /* Custom dropdown arrow */
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238080a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 1em;
@@ -242,10 +247,10 @@ main {
 
 .input-wrapper input {
     width: 100%;
-    padding: 0.8rem 2rem 0.8rem 0.8rem;
+    padding: 0.75rem 2rem 0.75rem 0.8rem;
     background-color: var(--input-bg);
-    border: 1px solid transparent;
-    border-bottom: 2px solid var(--border-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     color: var(--text-main);
     font-family: var(--font-body);
     font-size: 1rem;
@@ -253,7 +258,7 @@ main {
 }
 
 .input-wrapper input:focus {
-    border-bottom-color: var(--accent-primary);
+    border-color: var(--accent-primary);
 }
 
 /* Remove default up/down arrows from number inputs */
@@ -284,12 +289,35 @@ input[type=number] {
     grid-template-columns: 1fr 1.5fr 1.5fr;
     gap: 1rem;
     align-items: center;
-    padding: 1rem 0;
+    padding: 1rem 0 1rem 0.875rem;
     border-bottom: 1px solid var(--border-color);
+    border-left: 3px solid transparent;
+    transition: background-color 0.2s ease, border-left-color 0.3s ease;
 }
 
 .calc-row:last-child { border-bottom: none; }
-.calc-row.header { font-family: var(--font-heading); font-weight: 600; color: var(--accent-primary); padding-bottom: 0.5rem; }
+.calc-row.header {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    color: var(--accent-primary);
+    padding-bottom: 0.5rem;
+    border-left-color: transparent;
+}
+
+/* Sport accent strips */
+.calc-row.swim-row { border-left-color: var(--color-swim); }
+.calc-row.bike-row { border-left-color: var(--color-bike); }
+.calc-row.run-row  { border-left-color: var(--color-run); }
+.calc-row.trans-row{ border-left-color: var(--color-trans); }
+
+/* Hover state on data rows */
+.calc-row:not(.header):hover {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+}
+[data-theme="light"] .calc-row:not(.header):hover {
+    background-color: rgba(0, 0, 30, 0.03);
+}
 
 .sport-icon {
     display: flex;
@@ -326,8 +354,10 @@ input[type=number] {
 .total-section {
     text-align: center;
     margin-top: 1rem;
-    background: var(--input-bg);
-    border: 1px solid var(--accent-primary);
+    background:
+        linear-gradient(var(--input-bg), var(--input-bg)) padding-box,
+        linear-gradient(135deg, var(--color-swim) 0%, var(--color-bike) 50%, var(--color-run) 100%) border-box;
+    border: 2px solid transparent;
 }
 
 .total-label {
@@ -337,6 +367,13 @@ input[type=number] {
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
+
+@keyframes totalPulse {
+    0%   { opacity: 1; transform: scale(1); }
+    35%  { opacity: 0.55; transform: scale(0.98); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
 .total-display {
     font-family: var(--font-heading);
     font-size: 3.5rem;
@@ -344,6 +381,9 @@ input[type=number] {
     color: var(--text-main);
     font-variant-numeric: tabular-nums;
     line-height: 1.1;
+}
+.total-display.updating {
+    animation: totalPulse 0.28s ease-out forwards;
 }
 
 /* --- Find Next Race section --- */
@@ -359,31 +399,48 @@ input[type=number] {
 .race-link {
     display: flex;
     align-items: center;
-    height: 30px;
-    transition: opacity 0.3s;
+    justify-content: center;
+    height: auto;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: var(--input-bg);
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
 }
-.race-link:hover { opacity: 0.75; }
+.race-link:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    opacity: 1;
+}
 
 .race-link img {
-    height: 100%;
+    height: 28px;
     width: auto;
     object-fit: contain;
-    filter: brightness(0.9);
 }
 
 /* --- TriPlan section --- */
-.triplan-section { text-align: center; padding: 1rem 1.5rem; }
+.triplan-section { text-align: center; padding: 1.25rem 1.5rem; }
 
 .triplan-link {
-    display: block;
-    text-align: center;
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    border: 2px solid var(--accent-primary);
+    border-radius: 8px;
     text-decoration: none;
-    color: var(--text-main);
+    color: var(--accent-primary);
     font-family: var(--font-heading);
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 600;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease, border-color 0.3s ease;
 }
-.triplan-link:hover { color: var(--accent-primary); }
+.triplan-link:hover {
+    background-color: var(--accent-primary);
+    color: var(--bg-color);
+    transform: translateY(-2px);
+}
 
 /* --- Focus visible (keyboard nav) --- */
 :focus-visible {
@@ -404,6 +461,7 @@ footer {
     text-align: center;
     padding: 3rem 1rem;
     background-color: var(--bg-color);
+    border-top: 1px solid var(--border-color);
 }
 
 .footer-text {
@@ -456,7 +514,14 @@ footer {
         padding: 1rem;
         margin-bottom: 1rem;
         border: 1px solid var(--border-color);
+        border-left: 3px solid transparent;
     }
+
+    /* Sport accent strips override the mobile card border-left */
+    .calc-row.swim-row { border-left-color: var(--color-swim); }
+    .calc-row.bike-row { border-left-color: var(--color-bike); }
+    .calc-row.run-row  { border-left-color: var(--color-run); }
+    .calc-row.trans-row{ border-left-color: var(--color-trans); }
 
     .sport-icon { grid-area: sport; margin-bottom: 0.5rem; font-size: 1.1rem; }
 
