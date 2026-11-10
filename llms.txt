@@ -1,0 +1,67 @@
+# TriCalc
+
+> TriCalc is a free triathlon race time calculator (https://triathloncalc.netlify.app/). Enter a pace or speed (or a segment time) for the swim, bike and run, plus the two transition times, and it estimates the total finish time. It runs in the browser, needs no account, and supports metric and imperial units.
+
+## Using TriCalc as an agent
+
+The fastest way to get a result is a pre-filled URL. Load it in a browser and read the "Estimated Finish Time" value (the element with id `totalTimeDisplay`, exposed as `role="status"`).
+
+Example: an Olympic-distance race at 1:45/100m swim, 32 km/h bike, 5:00/km run, 2:00 T1 and 1:30 T2:
+
+https://triathloncalc.netlify.app/?preset=olympic&swimPace=1:45&bikeSpeed=32&runPace=5:00&t1=2:00&t2=1:30
+
+Imperial example: a full Ironman at 1:40/100y, 18 mph, 9:00/mi:
+
+https://triathloncalc.netlify.app/?units=imperial&preset=full&swimPace=1:40&bikeSpeed=18&runPace=9:00&t1=5:00&t2=4:00
+
+Custom distances (750 m swim, 25 km bike, 6 km run):
+
+https://triathloncalc.netlify.app/?swim=750&bike=25&run=6&swimPace=2:00&bikeSpeed=30&runPace=5:30
+
+### URL parameters
+
+All parameters are optional. Invalid or non-positive values are ignored.
+
+- `units`: `metric` (default) or `imperial`
+- `preset`: `super_sprint`, `sprint`, `olympic` (default), `t100`, `half`, `full` or `custom`
+- `swim`, `bike`, `run`: distances in the current units (metric: m, km, km; imperial: yards, miles, miles). Setting any of them switches the preset to `custom`; the others keep the preset's distance.
+- `swimPace`: mm:ss per 100 m (metric) or per 100 yd (imperial)
+- `bikeSpeed`: km/h (metric) or mph (imperial), a decimal number
+- `runPace`: mm:ss per km (metric) or per mile (imperial)
+- `swimTime`, `bikeTime`, `runTime`: hh:mm:ss. Used only when the matching pace/speed is not given; the pace/speed is then calculated from the time.
+- `t1`, `t2`: transition times, mm:ss
+
+URL values are not saved; reloading without parameters restores the defaults.
+
+### Filling the form directly
+
+Every input has a descriptive accessible name, for example "Swim pace (mm:ss per 100m)", "Bike speed (km/h)", "Run time (hh:mm:ss)" and "T1 transition time (mm:ss)". Time and pace fields accept digits (they fill right to left, like a microwave timer) or a value such as `01:45` set directly. Results update when the field's `change` event fires.
+
+## How the calculation works
+
+- Swim time = (swim distance / 100) x swim pace per 100 m (or 100 yd)
+- Bike time = bike distance / bike speed
+- Run time = run distance x run pace per km (or mile)
+- Estimated finish time = swim + T1 + bike + T2 + run
+
+Entering a time instead of a pace reverses the formula: swim pace = time x 100 / distance, bike speed = distance / time, run pace = time / distance.
+
+Switching units keeps your physical pace: 100 yd = 91.44 m, 1 mile = 1.609344 km.
+
+## Race presets
+
+| Preset | Metric (swim / bike / run) | Imperial (swim / bike / run) |
+|---|---|---|
+| Super Sprint (`super_sprint`) | 400 m / 10 km / 2.5 km | 437 yd / 6.21 mi / 1.55 mi |
+| Sprint (`sprint`) | 750 m / 20 km / 5 km | 820 yd / 12.43 mi / 3.11 mi |
+| Olympic (`olympic`) | 1500 m / 40 km / 10 km | 1640 yd / 24.85 mi / 6.21 mi |
+| T100 (`t100`) | 2000 m / 80 km / 18 km | 2187 yd / 49.71 mi / 11.18 mi |
+| Half Ironman 70.3 (`half`) | 1900 m / 90 km / 21.1 km | 2112 yd (1.2 mi) / 56 mi / 13.1 mi |
+| Full Ironman 140.6 (`full`) | 3800 m / 180 km / 42.2 km | 4224 yd (2.4 mi) / 112 mi / 26.2 mi |
+
+## Links
+
+- App: https://triathloncalc.netlify.app/
+- Source code: https://github.com/maosa/tricalc
+- Find a race: https://www.ironman.com/ and https://t100triathlon.com/
+- Plan a race: https://triathlonplan.vercel.app/

@@ -8,6 +8,43 @@
     <title>TriCalc | Triathlon Time Calculator</title>
     <meta name="description" content="Free triathlon calculator to estimate race times for Sprint, Olympic, 70.3, and Ironman distances. Accurate swim, bike, and run time & pace calculator.">
     <meta name="google-site-verification" content="4fwjruOFX5Z9I-qIhlG2VvcpWhB-urEvuggTiccUKbo" />
+    <link rel="canonical" href="https://triathloncalc.netlify.app/">
+
+    <!-- Discoverability for search engines, link previews and AI agents -->
+    <link rel="alternate" type="text/markdown" href="/llms.txt" title="TriCalc guide for AI agents">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="TriCalc">
+    <meta property="og:title" content="TriCalc | Triathlon Time Calculator">
+    <meta property="og:description" content="Estimate swim, bike, run and transition times and your total finish time for Sprint, Olympic, T100, 70.3 and Ironman triathlons.">
+    <meta property="og:url" content="https://triathloncalc.netlify.app/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="TriCalc | Triathlon Time Calculator">
+    <meta name="twitter:description" content="Estimate swim, bike, run and transition times and your total finish time for any triathlon distance.">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "TriCalc",
+        "url": "https://triathloncalc.netlify.app/",
+        "description": "Free triathlon race time calculator. Enter swim pace, bike speed, run pace and transition times (or segment times) to estimate the total finish time for Super Sprint, Sprint, Olympic, T100, Half Ironman 70.3 and Full Ironman distances, in metric or imperial units.",
+        "applicationCategory": "SportsApplication",
+        "operatingSystem": "Any (web browser)",
+        "browserRequirements": "Requires JavaScript",
+        "isAccessibleForFree": true,
+        "inLanguage": "en",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Person", "name": "Andreas Maos", "url": "https://andreasmaos.com" },
+        "potentialAction": {
+            "@type": "UseAction",
+            "description": "Open a pre-filled calculation. See /llms.txt for all parameters.",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://triathloncalc.netlify.app/?units={units}&preset={preset}&swimPace={swimPace}&bikeSpeed={bikeSpeed}&runPace={runPace}&t1={t1}&t2={t2}"
+            }
+        }
+    }
+    </script>
 
     <!-- Set theme before paint to avoid a flash of the wrong theme -->
     <script>
@@ -62,8 +99,8 @@
         <div class="controls">
             <div class="switch-container">
                 <span>Metric</span>
-                <label class="toggle-switch" aria-label="Units switcher to toggle between Metric (default) and Imperial units">
-                    <input type="checkbox" id="unitToggle">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="unitToggle" role="switch" aria-label="Use imperial units (miles and yards)">
                     <span class="slider"></span>
                 </label>
                 <span>Imperial</span>
@@ -79,13 +116,13 @@
         <section class="section-card">
             <h2 class="section-header">Race Distances</h2>
 
-            <select id="racePreset" class="preset-select" aria-label="Dropdown menu to select triathlon race type and distance">
-                <option value="super_sprint">Super Sprint</option>
-                <option value="sprint">Sprint</option>
-                <option value="olympic" selected>Olympic</option>
-                <option value="t100">T100</option>
-                <option value="half">Half Ironman</option>
-                <option value="full">Full Ironman</option>
+            <select id="racePreset" class="preset-select" aria-label="Race distance preset">
+                <option value="super_sprint">Super Sprint: Swim 400m | Bike 10km | Run 2.5km</option>
+                <option value="sprint">Sprint: Swim 750m | Bike 20km | Run 5km</option>
+                <option value="olympic" selected>Olympic: Swim 1500m | Bike 40km | Run 10km</option>
+                <option value="t100">T100: Swim 2000m | Bike 80km | Run 18km</option>
+                <option value="half">Half Ironman - 70.3: Swim 1900m | Bike 90km | Run 21.1km</option>
+                <option value="full">Full Ironman - 140.6: Swim 3800m | Bike 180km | Run 42.2km</option>
                 <option value="custom">Custom Distance</option>
             </select>
 
@@ -94,7 +131,7 @@
                 <div class="input-group">
                     <label for="distSwim">Swim</label>
                     <div class="input-wrapper">
-                        <input type="number" id="distSwim" step="any" inputmode="decimal" aria-label="Swim distance">
+                        <input type="number" id="distSwim" step="any" inputmode="decimal" aria-label="Swim distance (meters)">
                         <span class="unit-label" id="labelDistSwim">m</span>
                     </div>
                 </div>
@@ -102,7 +139,7 @@
                 <div class="input-group">
                     <label for="distBike">Bike</label>
                     <div class="input-wrapper">
-                        <input type="number" id="distBike" step="any" inputmode="decimal" aria-label="Bike distance">
+                        <input type="number" id="distBike" step="any" inputmode="decimal" aria-label="Bike distance (kilometers)">
                         <span class="unit-label" id="labelDistBike">km</span>
                     </div>
                 </div>
@@ -110,7 +147,7 @@
                 <div class="input-group">
                     <label for="distRun">Run</label>
                     <div class="input-wrapper">
-                        <input type="number" id="distRun" step="any" inputmode="decimal" aria-label="Run distance">
+                        <input type="number" id="distRun" step="any" inputmode="decimal" aria-label="Run distance (kilometers)">
                         <span class="unit-label" id="labelDistRun">km</span>
                     </div>
                 </div>
@@ -137,10 +174,10 @@
                     <span>Swim</span>
                 </div>
                 <div class="time-input-container pace-wrapper" data-label="Pace (mm:ss/100m)">
-                    <input type="text" id="paceSwim" inputmode="numeric" placeholder="mm:ss / 100m">
+                    <input type="text" id="paceSwim" inputmode="numeric" aria-label="Swim pace (mm:ss per 100m)" placeholder="mm:ss / 100m">
                 </div>
                 <div class="time-input-container time-wrapper">
-                    <input type="text" id="timeSwim" inputmode="numeric" placeholder="hh:mm:ss">
+                    <input type="text" id="timeSwim" inputmode="numeric" aria-label="Swim time (hh:mm:ss)" placeholder="hh:mm:ss">
                 </div>
             </div>
 
@@ -152,7 +189,7 @@
                 </div>
                 <div class="time-input-container disabled-input"></div>
                 <div class="time-input-container time-wrapper">
-                    <input type="text" id="timeT1" inputmode="numeric" placeholder="mm:ss">
+                    <input type="text" id="timeT1" inputmode="numeric" aria-label="T1 transition time (mm:ss)" placeholder="mm:ss">
                 </div>
             </div>
 
@@ -163,10 +200,10 @@
                     <span>Bike</span>
                 </div>
                 <div class="time-input-container pace-wrapper" id="labelSpeedBikeWrapper" data-label="Speed (km/h)">
-                    <input type="number" id="speedBike" step="any" inputmode="decimal" placeholder="Speed (km/h)">
+                    <input type="number" id="speedBike" step="any" min="0" inputmode="decimal" aria-label="Bike speed (km/h)" placeholder="Speed (km/h)">
                 </div>
                 <div class="time-input-container time-wrapper">
-                    <input type="text" id="timeBike" inputmode="numeric" placeholder="hh:mm:ss">
+                    <input type="text" id="timeBike" inputmode="numeric" aria-label="Bike time (hh:mm:ss)" placeholder="hh:mm:ss">
                 </div>
             </div>
 
@@ -178,7 +215,7 @@
                 </div>
                 <div class="time-input-container disabled-input"></div>
                 <div class="time-input-container time-wrapper">
-                    <input type="text" id="timeT2" inputmode="numeric" placeholder="mm:ss">
+                    <input type="text" id="timeT2" inputmode="numeric" aria-label="T2 transition time (mm:ss)" placeholder="mm:ss">
                 </div>
             </div>
 
@@ -189,10 +226,10 @@
                     <span>Run</span>
                 </div>
                 <div class="time-input-container pace-wrapper" data-label="Pace (mm:ss/km)">
-                    <input type="text" id="paceRun" inputmode="numeric" placeholder="mm:ss / km">
+                    <input type="text" id="paceRun" inputmode="numeric" aria-label="Run pace (mm:ss per km)" placeholder="mm:ss / km">
                 </div>
                 <div class="time-input-container time-wrapper">
-                    <input type="text" id="timeRun" inputmode="numeric" placeholder="hh:mm:ss">
+                    <input type="text" id="timeRun" inputmode="numeric" aria-label="Run time (hh:mm:ss)" placeholder="hh:mm:ss">
                 </div>
             </div>
 
@@ -202,8 +239,21 @@
 
         <!-- TOTAL TIME -->
         <section class="section-card total-section">
-            <div class="total-label">Estimated Finish Time</div>
-            <div class="total-display" id="totalTimeDisplay">00:00:00</div>
+            <div class="total-label" id="totalTimeLabel">Estimated Finish Time</div>
+            <div class="total-display" id="totalTimeDisplay" role="status" aria-live="polite" aria-labelledby="totalTimeLabel">00:00:00</div>
+        </section>
+
+        <!-- HOW IT WORKS (visually hidden; for screen readers, crawlers and AI agents) -->
+        <section class="visually-hidden" aria-labelledby="howItWorksHeading">
+            <h2 id="howItWorksHeading">How TriCalc calculates your finish time</h2>
+            <p>Pick a race preset or enter custom distances, then enter either a pace/speed or a time for each sport. The other value is calculated for you.</p>
+            <ul>
+                <li>Swim time = (swim distance &divide; 100) &times; swim pace per 100 m (or per 100 yd in imperial).</li>
+                <li>Bike time = bike distance &divide; bike speed (km/h or mph).</li>
+                <li>Run time = run distance &times; run pace per km (or per mile).</li>
+                <li>Estimated finish time = swim time + T1 + bike time + T2 + run time.</li>
+            </ul>
+            <p>Times use hh:mm:ss, paces and transitions use mm:ss. You can also pre-fill the calculator from the URL, for example <code>/?preset=olympic&amp;swimPace=1:45&amp;bikeSpeed=32&amp;runPace=5:00&amp;t1=2:00&amp;t2=1:30</code>. Full details are in <a href="/llms.txt">llms.txt</a>.</p>
         </section>
 
         <!-- FIND NEXT RACE -->

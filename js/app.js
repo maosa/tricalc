@@ -52,14 +52,19 @@ const LABELS = {
         swimPace: 'Pace (mm:ss/100m)', runPace: 'Pace (mm:ss/km)', bikeSpeed: 'Speed (km/h)',
         speedPlaceholder: 'Speed (km/h)',
         swimPacePlaceholder: 'mm:ss / 100m',
-        runPacePlaceholder: 'mm:ss / km'
+        runPacePlaceholder: 'mm:ss / km',
+        // Accessible names (read by screen readers and AI browser agents)
+        swimDistAria: 'Swim distance (meters)', bikeDistAria: 'Bike distance (kilometers)', runDistAria: 'Run distance (kilometers)',
+        swimPaceAria: 'Swim pace (mm:ss per 100m)', runPaceAria: 'Run pace (mm:ss per km)', bikeSpeedAria: 'Bike speed (km/h)'
     },
     imperial: {
         swim: 'y', bike: 'mi', run: 'mi',
         swimPace: 'Pace (mm:ss/100y)', runPace: 'Pace (mm:ss/mi)', bikeSpeed: 'Speed (mph)',
         speedPlaceholder: 'Speed (mph)',
         swimPacePlaceholder: 'mm:ss / 100y',
-        runPacePlaceholder: 'mm:ss / mi'
+        runPacePlaceholder: 'mm:ss / mi',
+        swimDistAria: 'Swim distance (yards)', bikeDistAria: 'Bike distance (miles)', runDistAria: 'Run distance (miles)',
+        swimPaceAria: 'Swim pace (mm:ss per 100y)', runPaceAria: 'Run pace (mm:ss per mile)', bikeSpeedAria: 'Bike speed (mph)'
     }
 };
 
@@ -405,6 +410,13 @@ function applyUnitLabels() {
     els.pace.swim.placeholder = LABELS[currentUnit].swimPacePlaceholder;
     els.pace.run.placeholder = LABELS[currentUnit].runPacePlaceholder;
 
+    els.dist.swim.setAttribute('aria-label', LABELS[currentUnit].swimDistAria);
+    els.dist.bike.setAttribute('aria-label', LABELS[currentUnit].bikeDistAria);
+    els.dist.run.setAttribute('aria-label', LABELS[currentUnit].runDistAria);
+    els.pace.swim.setAttribute('aria-label', LABELS[currentUnit].swimPaceAria);
+    els.pace.run.setAttribute('aria-label', LABELS[currentUnit].runPaceAria);
+    els.pace.bike.setAttribute('aria-label', LABELS[currentUnit].bikeSpeedAria);
+
     updateDropdownLabels();
 }
 
@@ -513,16 +525,22 @@ addSmartListener(els.dist.run, 'input', () => { els.presetSelect.value = 'custom
 // Pace inputs use the right-to-left mask, so no on-blur reformatting
 // is needed — the value is already in canonical MM:SS form. Bike speed
 // is a plain decimal number, no mask.
-addSmartListener(els.pace.swim, 'blur', calculateSwimTime);
+//
+// Masked fields recalculate on 'change', not 'blur'. For people the two
+// behave the same (change fires on commit when the value changed), but
+// browser agents and autofill set .value and dispatch input/change
+// without ever focusing or blurring the field — 'blur' would never fire
+// and the total would stay at 00:00:00.
+addSmartListener(els.pace.swim, 'change', calculateSwimTime);
 addSmartListener(els.pace.bike, 'input', calculateBikeTime);
-addSmartListener(els.pace.run, 'blur', calculateRunTime);
+addSmartListener(els.pace.run, 'change', calculateRunTime);
 
 // 4. Time Inputs (Calculate Pace)
-addSmartListener(els.time.swim, 'blur', calculateSwimPace);
-addSmartListener(els.time.t1, 'blur', updateTotal);
-addSmartListener(els.time.bike, 'blur', calculateBikeSpeed);
-addSmartListener(els.time.t2, 'blur', updateTotal);
-addSmartListener(els.time.run, 'blur', calculateRunPace);
+addSmartListener(els.time.swim, 'change', calculateSwimPace);
+addSmartListener(els.time.t1, 'change', updateTotal);
+addSmartListener(els.time.bike, 'change', calculateBikeSpeed);
+addSmartListener(els.time.t2, 'change', updateTotal);
+addSmartListener(els.time.run, 'change', calculateRunPace);
 
 // Enter key support for inputs — use cached els to avoid redundant DOM query
 const allInputs = [
@@ -574,6 +592,92 @@ els.themeToggle.addEventListener('click', () => {
     setTheme(current === 'light' ? 'dark' : 'light', true);
 });
 
+// --- URL parameters (deep links for people and AI agents) ---
+
+/**
+ * Pre-fills the calculator from the query string so a link (or an AI
+ * agent) can open a finished calculation without touching the UI, e.g.
+ *
+ *   /?preset=olympic&swimPace=1:45&bikeSpeed=32&runPace=5:00&t1=2:00&t2=1:30
+ *
+ * Supported keys (all optional; invalid values are ignored):
+ *   units                      metric | imperial
+ *   preset                     super_sprint | sprint | olympic | t100 | half | full | custom
+ *   swim, bike, run            distances in the current units (m|y, km|mi, km|mi);
+ *                              any of these switches the preset to custom
+ *   swimPace, runPace          mm:ss per 100m|100y and per km|mi
+ *   bikeSpeed                  km/h | mph
+ *   swimTime, bikeTime, runTime  hh:mm:ss (used when the matching pace is absent)
+ *   t1, t2                     mm:ss
+ *
+ * Read-only: values from the URL are never written to localStorage, and
+ * the URL is not rewritten as the user edits. Keep this list in sync with
+ * llms.txt.
+ */
+function applyUrlParams() {
+    let params;
+    try { params = new URLSearchParams(window.location.search); } catch (e) { return; }
+    if (!params.toString()) return;
+
+    const posNum = (key) => {
+        const n = parseFloat(params.get(key));
+        return isFinite(n) && n > 0 ? n : null;
+    };
+    const posTime = (key) => {
+        const raw = (params.get(key) || '').trim();
+        // Strict ss / mm:ss / hh:mm:ss only — parseTimeString strips other
+        // characters, which would turn "-3" into 3 seconds.
+        if (!/^\d+(:\d+){0,2}$/.test(raw)) return null;
+        const sec = parseTimeString(raw);
+        return isFinite(sec) && sec > 0 ? sec : null;
+    };
+
+    // Units first: nothing has been entered yet, so no pace conversion is needed.
+    const units = (params.get('units') || '').toLowerCase();
+    if ((units === 'metric' || units === 'imperial') && units !== currentUnit) {
+        currentUnit = units;
+        els.unitToggle.checked = (units === 'imperial');
+        applyUnitLabels();
+    }
+
+    const preset = (params.get('preset') || '').toLowerCase();
+    if (preset === 'custom' || Object.prototype.hasOwnProperty.call(PRESETS.metric, preset)) {
+        els.presetSelect.value = preset;
+    }
+    handlePresetChange();
+
+    // Distance overrides start from the preset's distances and switch to custom.
+    const dist = { swim: posNum('swim'), bike: posNum('bike'), run: posNum('run') };
+    if (dist.swim || dist.bike || dist.run) {
+        els.presetSelect.value = 'custom';
+        ['swim', 'bike', 'run'].forEach(k => { if (dist[k]) els.dist[k].value = dist[k]; });
+    }
+
+    const swimPace = posTime('swimPace');
+    const runPace = posTime('runPace');
+    const bikeSpeed = posNum('bikeSpeed');
+    const swimTime = posTime('swimTime');
+    const bikeTime = posTime('bikeTime');
+    const runTime = posTime('runTime');
+    const t1 = posTime('t1');
+    const t2 = posTime('t2');
+
+    if (t1) els.time.t1.value = secondsToPace(t1);
+    if (t2) els.time.t2.value = secondsToPace(t2);
+
+    // Pace/speed wins over time when both are given for the same sport.
+    if (swimPace) { els.pace.swim.value = secondsToPace(swimPace); calculateSwimTime(); }
+    else if (swimTime) { els.time.swim.value = secondsToHMS(swimTime); calculateSwimPace(); }
+
+    if (bikeSpeed) { els.pace.bike.value = bikeSpeed; calculateBikeTime(); }
+    else if (bikeTime) { els.time.bike.value = secondsToHMS(bikeTime); calculateBikeSpeed(); }
+
+    if (runPace) { els.pace.run.value = secondsToPace(runPace); calculateRunTime(); }
+    else if (runTime) { els.time.run.value = secondsToHMS(runTime); calculateRunPace(); }
+
+    updateTotal();
+}
+
 // --- Initialize ---
 
 // 1. Restore unit + saved paces (if any) BEFORE applying preset distances,
@@ -585,6 +689,11 @@ applyUnitLabels();
 
 // 3. Fill distances for the current preset and recompute times
 handlePresetChange();
+
+// 3b. Apply any deep-link values from the URL (units, preset, distances,
+//     paces, times). Runs before the masks are attached so they pick up
+//     the values it writes.
+applyUrlParams();
 
 // 4. Wire up the right-to-left masked input on every time/pace field.
 //    Done last so the mask picks up whatever values restoreState +

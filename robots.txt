@@ -1,0 +1,6 @@
+# TriCalc welcomes search engines and AI agents.
+# A plain-text guide for AI agents (formulas, presets, URL parameters) is at /llms.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://triathloncalc.netlify.app/sitemap.xml

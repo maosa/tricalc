@@ -23,12 +23,23 @@ The app is split across three files:
   - `updateTotal()`: sums all segment times and updates the display
   - `addSmartListener()`: custom listener that tracks the original value on focus and only re-runs the handler if the value actually changed — use this instead of plain `addEventListener` for time/pace inputs to prevent rounding drift on tab-through
   - Swim/Run use pace (MM:SS per distance unit); Bike uses speed (km/h or mph); Transitions are time-only
+  - `applyUrlParams()`: pre-fills the calculator from query-string deep links (`units`, `preset`, distances, paces/speed, times). Read-only; keep its parameter list in sync with `llms.txt`
+  - Masked time/pace fields recalculate on `change`, not `blur`: browser agents set values without focusing/blurring, so `blur`-only handlers never fire for them
+
+## Agent Readiness
+
+The site is meant to be usable by AI agents as well as people. Keep these in place when editing:
+
+- **`llms.txt`, `robots.txt`, `sitemap.xml`** at the repo root (served as-is by Netlify). Update `llms.txt` when presets, formulas or URL parameters change.
+- **`<head>` metadata**: canonical URL, Open Graph/Twitter tags and `WebApplication` JSON-LD.
+- **Accessible names**: every input needs a descriptive `aria-label` (unit-dependent ones live in `LABELS.*Aria` and are applied in `applyUnitLabels()`). `#totalTimeDisplay` is a `role="status"` live region.
+- **Static content**: `<option>` text holds the metric distances, and a `.visually-hidden` "How it works" section explains the formulas for readers that don't run JavaScript.
 
 The `media/` directory holds the Ironman and T100 logo images referenced from the "Find Your Next Race" section.
 
 ## Common Modifications
 
-**Adding a race preset:** add entries to `PRESETS.metric`, `PRESETS.imperial`, `DROPDOWN_TEXTS.metric`, `DROPDOWN_TEXTS.imperial`, and a corresponding `<option>` in `#racePreset`.
+**Adding a race preset:** add entries to `PRESETS.metric`, `PRESETS.imperial`, `DROPDOWN_TEXTS.metric`, `DROPDOWN_TEXTS.imperial`, a corresponding `<option>` in `#racePreset` (with the metric dropdown text), and a row in the `llms.txt` preset table.
 
 **Adding a calculation segment:** add HTML inputs, create `calculate*()` and `calculate*Pace/Speed()` functions, attach them via `addSmartListener()`, and include the segment in `updateTotal()`.
 

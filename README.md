@@ -31,6 +31,15 @@ Built with a sleek, tech-focused dark mode aesthetic, this tool was deliberately
 3.  **Enter Data:** Input your desired pace or speed for the Swim, Bike, and Run segments. Alternatively, enter a total time and the calculator will find the required pace/speed.
 4.  **View Results:** The **TOTAL TIME** section will instantly update to show your estimated final result.
 
+## 🤖 Agent-Ready
+
+TriCalc is built to be found, read and used by AI agents and assistants (e.g. Claude in Chrome), not just people:
+
+* **Deep links:** pre-fill a calculation from the URL, e.g. [`/?preset=olympic&swimPace=1:45&bikeSpeed=32&runPace=5:00&t1=2:00&t2=1:30`](https://triathloncalc.netlify.app/?preset=olympic&swimPace=1:45&bikeSpeed=32&runPace=5:00&t1=2:00&t2=1:30). All parameters are documented in [`llms.txt`](llms.txt).
+* **Discoverability:** `robots.txt`, `sitemap.xml`, `llms.txt`, a canonical URL, Open Graph tags and `WebApplication` JSON-LD.
+* **Readable without JavaScript:** preset distances and the calculation formulas are in the static HTML.
+* **Usable by browser agents:** every input has a descriptive accessible name, the finish time is a labelled live region, and results update on the `change` event so programmatic form fills work.
+
 ---
 
 **Built with focus and good vibes.**
