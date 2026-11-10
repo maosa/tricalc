@@ -14,7 +14,7 @@ There is no npm, no Makefile, no test framework, and no linter. To "run" the app
 
 The app is split across three files:
 
-- **`index.html`** — markup only. Loads `css/styles.css` in `<head>` and `js/app.js` with `defer` (the script assumes the DOM is parsed before it runs, so `defer` is required).
+- **`index.html`** — markup only. Loads `css/styles.css` and `js/theme-init.js` (synchronous, sets the theme before first paint) in `<head>`, `js/app.js` with `defer` (the script assumes the DOM is parsed before it runs, so `defer` is required), and `js/analytics.js` (GA4 bootstrap) at the end of `<body>`.
 - **`css/styles.css`** — all styles. CSS variables in `:root` (dark mode default) and `[data-theme="light"]` define colors and typography. Sport accent colors: `--color-swim` (blue), `--color-bike` (green), `--color-run` (orange), `--color-trans` (silver). Mobile breakpoint at 768px; below it, the grid collapses and `data-label` pseudo-elements replace the header row.
 - **`js/app.js`** — all logic.
   - `PRESETS` / `DROPDOWN_TEXTS` / `LABELS`: data objects keyed by `"metric"` / `"imperial"`
@@ -25,6 +25,15 @@ The app is split across three files:
   - Swim/Run use pace (MM:SS per distance unit); Bike uses speed (km/h or mph); Transitions are time-only
   - `applyUrlParams()`: pre-fills the calculator from query-string deep links (`units`, `preset`, distances, paces/speed, times). Read-only; keep its parameter list in sync with `llms.txt`
   - Masked time/pace fields recalculate on `change`, not `blur`: browser agents set values without focusing/blurring, so `blur`-only handlers never fire for them
+
+## Security Headers
+
+`_headers` (Netlify) sets a strict Content-Security-Policy plus frame, MIME-sniffing, referrer and permissions headers for every file. Because of the CSP:
+
+- **No inline code or styles in `index.html`**: no `<script>` bodies, no `onload`/`onerror`/`onclick` attributes, no `style=""`. Put code in `js/` and styles in `css/`. (`<script type="application/ld+json">` is data, not script, and is allowed.) The logo fallbacks use `data-fallback-src` and the async Google Fonts stylesheet uses `data-async-style`; both are wired up in `app.js`.
+- **New external resources must be allowlisted** in the matching CSP directive (`script-src`, `img-src`, `connect-src`, `style-src`, `font-src`), or the browser will block them.
+- `_headers` only applies on Netlify, so opening `index.html` locally won't show CSP problems. Check the browser console on a deploy preview or the live site after changing it.
+- Deep-link values are validated strictly and capped by `URL_LIMITS` in `app.js`; keep `llms.txt` in sync if the limits change.
 
 ## Agent Readiness
 

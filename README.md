@@ -38,6 +38,7 @@ TriCalc is built to be found, read and used by AI agents and assistants (e.g. Cl
 * **Deep links:** pre-fill a calculation from the URL, e.g. [`/?preset=olympic&swimPace=1:45&bikeSpeed=32&runPace=5:00&t1=2:00&t2=1:30`](https://triathloncalc.netlify.app/?preset=olympic&swimPace=1:45&bikeSpeed=32&runPace=5:00&t1=2:00&t2=1:30). All parameters are documented in [`llms.txt`](llms.txt).
 * **Discoverability:** `robots.txt`, `sitemap.xml`, `llms.txt`, a canonical URL, Open Graph tags and `WebApplication` JSON-LD.
 * **Readable without JavaScript:** preset distances and the calculation formulas are in the static HTML.
+* **Secure by default:** a strict Content-Security-Policy and standard security headers (`_headers`), and strictly validated, range-limited deep-link values.
 * **Usable by browser agents:** every input has a descriptive accessible name, the finish time is a labelled live region, and results update on the `change` event so programmatic form fills work.
 
 ---

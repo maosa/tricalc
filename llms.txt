@@ -20,7 +20,7 @@ https://triathloncalc.netlify.app/?swim=750&bike=25&run=6&swimPace=2:00&bikeSpee
 
 ### URL parameters
 
-All parameters are optional. Invalid or non-positive values are ignored.
+All parameters are optional. Invalid, non-positive or out-of-range values are ignored. Limits: swim distance up to 50000, bike up to 2000, run up to 500, bike speed up to 100, paces and transitions up to 59:59, segment times up to 99:59:59. Numbers are plain decimals (no signs or exponents).
 
 - `units`: `metric` (default) or `imperial`
 - `preset`: `super_sprint`, `sprint`, `olympic` (default), `t100`, `half`, `full` or `custom`

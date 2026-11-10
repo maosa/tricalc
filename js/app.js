@@ -592,6 +592,28 @@ els.themeToggle.addEventListener('click', () => {
     setTheme(current === 'light' ? 'dark' : 'light', true);
 });
 
+// --- Non-blocking stylesheets & image fallbacks ---
+// These used to be inline onload/onerror attributes. They live here so the
+// Content-Security-Policy (see _headers) can forbid all inline script.
+
+// Google Fonts loads with media="print" so it doesn't block first paint;
+// switch it on now that the page has been parsed.
+document.querySelectorAll('link[data-async-style]').forEach(link => { link.media = 'all'; });
+
+// Swap a broken local image for its remote fallback (once only). The error
+// may already have fired before this deferred script ran, so check
+// complete/naturalWidth as well as listening for it.
+document.querySelectorAll('img[data-fallback-src]').forEach(img => {
+    const useFallback = () => {
+        const fallback = img.dataset.fallbackSrc;
+        if (!fallback) return;
+        delete img.dataset.fallbackSrc;
+        img.src = fallback;
+    };
+    if (img.complete && img.currentSrc && img.naturalWidth === 0) useFallback();
+    else img.addEventListener('error', useFallback);
+});
+
 // --- URL parameters (deep links for people and AI agents) ---
 
 /**
@@ -614,22 +636,39 @@ els.themeToggle.addEventListener('click', () => {
  * the URL is not rewritten as the user edits. Keep this list in sync with
  * llms.txt.
  */
+// Upper bounds for deep-link values (in the current units). Generous enough
+// for any real race, tight enough to keep the display sane.
+const URL_LIMITS = {
+    swimDist: 50000,      // m or yd
+    bikeDist: 2000,       // km or mi
+    runDist: 500,         // km or mi
+    bikeSpeed: 100,       // km/h or mph
+    pace: 3599,           // 59:59 per 100m/100y or per km/mi
+    segmentTime: 359999,  // 99:59:59
+    transition: 3599      // 59:59
+};
+
 function applyUrlParams() {
     let params;
     try { params = new URLSearchParams(window.location.search); } catch (e) { return; }
     if (!params.toString()) return;
 
-    const posNum = (key) => {
-        const n = parseFloat(params.get(key));
-        return isFinite(n) && n > 0 ? n : null;
+    // Every value must be well-formed, positive and within URL_LIMITS;
+    // anything else is ignored rather than clamped, so a bad link just
+    // falls back to the defaults.
+    const posNum = (key, max) => {
+        const raw = (params.get(key) || '').trim();
+        if (!/^\d{1,6}(\.\d{1,3})?$/.test(raw)) return null;   // plain decimal, no sign/exponent
+        const n = Number(raw);
+        return n > 0 && n <= max ? n : null;
     };
-    const posTime = (key) => {
+    const posTime = (key, max) => {
         const raw = (params.get(key) || '').trim();
         // Strict ss / mm:ss / hh:mm:ss only — parseTimeString strips other
         // characters, which would turn "-3" into 3 seconds.
-        if (!/^\d+(:\d+){0,2}$/.test(raw)) return null;
+        if (!/^\d{1,6}(:\d{1,2}){0,2}$/.test(raw)) return null;
         const sec = parseTimeString(raw);
-        return isFinite(sec) && sec > 0 ? sec : null;
+        return sec > 0 && sec <= max ? sec : null;
     };
 
     // Units first: nothing has been entered yet, so no pace conversion is needed.
@@ -647,20 +686,24 @@ function applyUrlParams() {
     handlePresetChange();
 
     // Distance overrides start from the preset's distances and switch to custom.
-    const dist = { swim: posNum('swim'), bike: posNum('bike'), run: posNum('run') };
+    const dist = {
+        swim: posNum('swim', URL_LIMITS.swimDist),
+        bike: posNum('bike', URL_LIMITS.bikeDist),
+        run: posNum('run', URL_LIMITS.runDist)
+    };
     if (dist.swim || dist.bike || dist.run) {
         els.presetSelect.value = 'custom';
         ['swim', 'bike', 'run'].forEach(k => { if (dist[k]) els.dist[k].value = dist[k]; });
     }
 
-    const swimPace = posTime('swimPace');
-    const runPace = posTime('runPace');
-    const bikeSpeed = posNum('bikeSpeed');
-    const swimTime = posTime('swimTime');
-    const bikeTime = posTime('bikeTime');
-    const runTime = posTime('runTime');
-    const t1 = posTime('t1');
-    const t2 = posTime('t2');
+    const swimPace = posTime('swimPace', URL_LIMITS.pace);
+    const runPace = posTime('runPace', URL_LIMITS.pace);
+    const bikeSpeed = posNum('bikeSpeed', URL_LIMITS.bikeSpeed);
+    const swimTime = posTime('swimTime', URL_LIMITS.segmentTime);
+    const bikeTime = posTime('bikeTime', URL_LIMITS.segmentTime);
+    const runTime = posTime('runTime', URL_LIMITS.segmentTime);
+    const t1 = posTime('t1', URL_LIMITS.transition);
+    const t2 = posTime('t2', URL_LIMITS.transition);
 
     if (t1) els.time.t1.value = secondsToPace(t1);
     if (t2) els.time.t2.value = secondsToPace(t2);

@@ -75,6 +75,10 @@ body {
    the same direction as the run icon. */
 .swim-icon { transform: scaleX(-1); }
 
+/* Hidden SVG <symbol> sprite (moved here from an inline style so the CSP
+   can disallow inline styles). */
+.icon-sprite { position: absolute; }
+
 /* Hidden visually but kept in the DOM for screen readers, crawlers and
    AI agents that read the page as text. */
 .visually-hidden {
